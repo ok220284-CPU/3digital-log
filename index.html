@@ -18,7 +18,7 @@
   --panel: #141414;
   --panel-2: #1c1c1c;
   --border: #2a2a2a;
-  --accent: #ffa726;        /* アクセントのみ使用 */
+  --accent: #ffa726;        
   --accent-dim: #8a5a1a;
   --green: #4ade80;
   --red: #ef4444;
@@ -54,453 +54,428 @@ body {
     radial-gradient(circle at 80% 100%, rgba(56,189,248,0.03) 0%, transparent 50%);
   min-height: 100vh;
 }
-
-/* ヘッダー */
 .header {
-display: flex;
-justify-content: space-between;
-align-items: center;
-padding: 8px 4px 14px;
-border-bottom: 1px solid var(–border);
-margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 4px 14px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
 }
 .logo {
-font-family: var(–font);
-font-size: 14px;
-letter-spacing: 0.5px;
-color: var(–accent);
-font-weight: 700;
+  font-family: var(--font);
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  font-weight: 700;
 }
-.logo::before { content: “◎ “; color: #c0c0c0; }
+.logo::before { content: "◎ "; color: #c0c0c0; }
 .clock {
-font-family: var(–mono);
-font-size: 16px;
-color: var(–text-dim);
-letter-spacing: 1px;
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
 }
-
-/* ドライバー選択 */
 .driver-bar {
-display: flex;
-gap: 8px;
-margin-bottom: 14px;
-align-items: center;
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  align-items: center;
 }
 .driver-select {
-flex: 1;
-background: var(–panel);
-border: 1px solid var(–border);
-color: var(–text);
-padding: 10px 12px;
-font-size: 16px;
-font-family: inherit;
-border-radius: 6px;
-appearance: none;
-background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘10’ height=‘6’ viewBox=‘0 0 10 6’%3E%3Cpath d=‘M1 1l4 4 4-4’ stroke=’%23888’ fill=‘none’ stroke-width=‘1.5’/%3E%3C/svg%3E”);
-background-repeat: no-repeat;
-background-position: right 12px center;
+  flex: 1;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 16px;
+  font-family: inherit;
+  border-radius: 6px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
 }
 .driver-btn {
-background: var(–panel);
-border: 1px solid var(–border);
-color: var(–text-dim);
-padding: 10px 12px;
-border-radius: 6px;
-font-size: 16px;
-cursor: pointer;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
 }
-
-/* ステータスパネル */
 .status-panel {
-background: linear-gradient(180deg, var(–panel) 0%, var(–panel-2) 100%);
-border: 1px solid var(–border);
-border-radius: 10px;
-padding: 16px;
-margin-bottom: 14px;
-position: relative;
-overflow: hidden;
+  background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
 }
 .status-panel::before {
-content: “”;
-position: absolute;
-top: 0; left: 0; right: 0;
-height: 1px;
-background: linear-gradient(90deg, transparent, var(–accent), transparent);
-opacity: 0.5;
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.5;
 }
 .status-label {
-font-family: var(–mono);
-font-size: 16px;
-color: var(–text-dim);
-letter-spacing: 2px;
-margin-bottom: 6px;
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
 }
 .status-value {
-font-family: var(–mono);
-font-size: 28px;
-font-weight: 700;
-color: var(–white);
-letter-spacing: 1px;
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 1px;
 }
-.status-value.idle { color: var(–text-dim); }
-.status-value.rest { color: var(–blue); }
+.status-value.idle { color: var(--text-dim); }
+.status-value.rest { color: var(--blue); }
 .status-time {
-font-family: var(–mono);
-font-size: 16px;
-color: var(–text-dim);
-margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--text-dim);
+  margin-top: 4px;
 }
-
-/* メーター */
-/* トグル */
 .toggles {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 10px;
-margin-bottom: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
 }
 .toggle {
-background: var(–panel);
-border: 1px solid var(–border);
-border-radius: 8px;
-padding: 10px;
-display: flex;
-flex-direction: column;
-align-items: center;
-cursor: pointer;
-transition: all 0.15s;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 .toggle:active { transform: scale(0.97); }
 .toggle-label {
-font-family: var(–mono);
-font-size: 16px;
-color: var(–text-dim);
-letter-spacing: 1.5px;
-margin-bottom: 6px;
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--text-dim);
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
 }
 .toggle-options {
-display: flex;
-gap: 4px;
-width: 100%;
+  display: flex;
+  gap: 4px;
+  width: 100%;
 }
 .toggle-opt {
-flex: 1;
-padding: 6px 4px;
-background: var(–bg);
-border: 1px solid var(–border);
-border-radius: 4px;
-font-size: 16px;
-color: var(–text-dim);
-text-align: center;
-font-weight: 600;
+  flex: 1;
+  padding: 6px 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 16px;
+  color: var(--text-dim);
+  text-align: center;
+  font-weight: 600;
 }
 .toggle-opt.active {
-background: var(–accent);
-color: #000;
-border-color: var(–accent);
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
 }
-
-/* アクションボタン */
 .section-title {
-font-family: var(–mono);
-font-size: 16px;
-color: var(–text-dim);
-letter-spacing: 2px;
-margin: 8px 4px 10px;
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  margin: 8px 4px 10px;
 }
 .actions {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 8px;
-margin-bottom: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 .action-btn {
-background: var(–panel);
-border: 1px solid var(–border);
-border-radius: 8px;
-padding: 14px 8px;
-color: var(–white);
-font-size: 16px;
-font-weight: 600;
-cursor: pointer;
-transition: all 0.15s;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 6px;
-position: relative;
-overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 8px;
+  color: var(--white);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
 }
 .action-btn::before {
-content: “”;
-position: absolute;
-left: 0; top: 0; bottom: 0;
-width: 3px;
-background: var(–text-dim);
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--text-dim);
 }
-.action-btn:active { transform: scale(0.96); background: var(–panel-2); }
+.action-btn:active { transform: scale(0.96); background: var(--panel-2); }
 .action-btn .ico { font-size: 16px; }
-.action-btn.start::before { background: var(–green); }
-.action-btn.end::before { background: var(–red); }
-.action-btn.drive::before { background: var(–accent); }
-.action-btn.rest::before { background: var(–blue); }
-
-/* ログ */
+.action-btn.start::before { background: var(--green); }
+.action-btn.end::before { background: var(--red); }
+.action-btn.drive::before { background: var(--accent); }
+.action-btn.rest::before { background: var(--blue); }
 .log-panel {
-background: var(–panel);
-border: 1px solid var(–border);
-border-radius: 10px;
-padding: 12px;
-margin-bottom: 14px;
-max-height: 280px;
-overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 14px;
+  max-height: 280px;
+  overflow-y: auto;
 }
 .log-header {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-bottom: 10px;
-padding-bottom: 8px;
-border-bottom: 1px dashed var(–border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--border);
 }
 .log-title {
-font-family: var(–mono);
-font-size: 16px;
-color: var(–text-dim);
-letter-spacing: 2px;
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
 }
 .log-count {
-font-family: var(–mono);
-font-size: 16px;
-color: var(–accent);
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--accent);
 }
 .log-entry {
-display: grid;
-grid-template-columns: 50px 1fr auto;
-gap: 8px;
-padding: 7px 0;
-border-bottom: 1px solid rgba(255,255,255,0.03);
-font-size: 16px;
-align-items: center;
+  display: grid;
+  grid-template-columns: 50px 1fr auto;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-size: 16px;
+  align-items: center;
 }
 .log-entry:last-child { border-bottom: none; }
 .log-time {
-font-family: var(–mono);
-color: var(–text-dim);
-font-size: 16px;
+  font-family: var(--mono);
+  color: var(--text-dim);
+  font-size: 16px;
 }
-.log-event { color: var(–text); }
+.log-event { color: var(--text); }
 .log-meta {
-font-family: var(–mono);
-font-size: 16px;
-color: var(–text-dim);
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--text-dim);
 }
 .log-empty {
-text-align: center;
-color: var(–text-dim);
-padding: 20px 0;
-font-size: 16px;
+  text-align: center;
+  color: var(--text-dim);
+  padding: 20px 0;
+  font-size: 16px;
 }
-
-/* フッター */
 .footer-actions {
-display: grid;
-grid-template-columns: 1fr 1fr 1fr;
-gap: 8px;
-margin-bottom: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 .footer-btn {
-background: var(–panel);
-border: 1px solid var(–border);
-color: var(–text-dim);
-padding: 12px 6px;
-border-radius: 8px;
-font-size: 16px;
-font-family: inherit;
-cursor: pointer;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 12px 6px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: inherit;
+  cursor: pointer;
 }
-.footer-btn:active { background: var(–panel-2); }
-
-/* アラート */
+.footer-btn:active { background: var(--panel-2); }
 .alert {
-position: fixed;
-top: 20px;
-left: 50%;
-transform: translateX(-50%);
-background: var(–red);
-color: #fff;
-padding: 12px 20px;
-border-radius: 8px;
-font-size: 16px;
-font-weight: 600;
-z-index: 100;
-box-shadow: 0 4px 20px rgba(239,68,68,0.4);
-animation: slideDown 0.3s ease;
-max-width: 90%;
-text-align: center;
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--red);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(239,68,68,0.4);
+  animation: slideDown 0.3s ease;
+  max-width: 90%;
+  text-align: center;
 }
 .alert.warn { background: #ffd54f; color: #000; }
-.alert.info { background: var(–blue); color: #000; }
+.alert.info { background: var(--blue); color: #000; }
 @keyframes slideDown {
-from { transform: translate(-50%, -100%); opacity: 0; }
-to { transform: translate(-50%, 0); opacity: 1; }
+  from { transform: translate(-50%, -100%); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
 }
-
-/* モーダル */
 .modal-overlay {
-position: fixed;
-inset: 0;
-background: rgba(0,0,0,0.8);
-display: none;
-align-items: center;
-justify-content: center;
-z-index: 200;
-padding: 20px;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
 }
 .modal-overlay.show { display: flex; }
 .modal {
-background: var(–panel);
-border: 1px solid var(–border);
-border-radius: 12px;
-padding: 20px;
-max-width: 400px;
-width: 100%;
-max-height: 80vh;
-overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 400px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 .modal h3 {
-font-family: var(–mono);
-font-size: 16px;
-letter-spacing: 2px;
-color: var(–accent);
-margin-bottom: 14px;
+  font-family: var(--mono);
+  font-size: 16px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 14px;
 }
 .modal input, .modal textarea {
-width: 100%;
-background: var(–bg);
-border: 1px solid var(–border);
-color: var(–text);
-padding: 10px;
-border-radius: 6px;
-font-family: inherit;
-font-size: 16px;
-margin-bottom: 10px;
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 16px;
+  margin-bottom: 10px;
 }
-.modal textarea { min-height: 80px; resize: vertical; font-family: var(–mono); font-size: 16px; }
+.modal textarea { min-height: 80px; resize: vertical; font-family: var(--mono); font-size: 16px; }
 .modal-btns { display: flex; gap: 8px; margin-top: 10px; }
 .modal-btn {
-flex: 1;
-padding: 10px;
-border-radius: 6px;
-border: 1px solid var(–border);
-background: var(–bg);
-color: var(–text);
-font-family: inherit;
-font-size: 16px;
-cursor: pointer;
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 16px;
+  cursor: pointer;
 }
-.modal-btn.primary { background: var(–accent); color: #000; border-color: var(–accent); font-weight: 700; }
-.modal-btn.danger { background: var(–red); color: #fff; border-color: var(–red); }
-
-/* プリセットチップ */
+.modal-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+.modal-btn.danger { background: var(--red); color: #fff; border-color: var(--red); }
 .chip-label {
-font-family: var(–mono);
-font-size: 16px;
-color: var(–text-dim);
-letter-spacing: 1px;
-margin: 4px 0 6px;
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin: 4px 0 6px;
 }
 .chip-row {
-display: flex;
-flex-wrap: wrap;
-gap: 6px;
-margin-bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 .chip {
-background: var(–bg);
-border: 1px solid var(–border);
-color: var(–text);
-padding: 6px 10px;
-border-radius: 14px;
-font-size: 16px;
-font-family: var(–mono);
-cursor: pointer;
-user-select: none;
-transition: all 0.1s;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-family: var(--mono);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.1s;
 }
-.chip:active { transform: scale(0.94); background: var(–panel-2); }
-.chip.selected { background: var(–accent); color: #000; border-color: var(–accent); font-weight: 700; }
+.chip:active { transform: scale(0.94); background: var(--panel-2); }
+.chip.selected { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
 .chip-site {
-font-family: -apple-system, BlinkMacSystemFont, ‘Hiragino Sans’, sans-serif;
-font-size: 16px;
-padding: 8px 12px;
-border-radius: 8px;
-line-height: 1.3;
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif;
+  font-size: 16px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  line-height: 1.3;
 }
 .chip-toll {
-display: block;
-width: 100%;
-text-align: left;
-padding: 8px 10px;
-border-radius: 6px;
-margin-bottom: 4px;
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 4px;
 }
-.chip-toll .route { font-size: 16px; color: var(–white); }
-.chip-toll .yen { font-size: 16px; color: var(–text-dim); margin-top: 2px; }
-.chip-empty { font-size: 16px; color: var(–text-dim); font-style: italic; padding: 4px 0; }
-
-/* 稼働バー */
+.chip-toll .route { font-size: 16px; color: var(--white); }
+.chip-toll .yen { font-size: 16px; color: var(--text-dim); margin-top: 2px; }
+.chip-empty { font-size: 16px; color: var(--text-dim); font-style: italic; padding: 4px 0; }
 .duty-bar {
-background: var(–panel);
-border: 1px solid var(–border);
-border-radius: 8px;
-padding: 10px 12px;
-margin-bottom: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
 }
 .duty-row {
-display: flex;
-justify-content: space-between;
-font-family: var(–mono);
-font-size: 16px;
-margin: 5px 0;
-align-items: center;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 16px;
+  margin: 5px 0;
+  align-items: center;
 }
-.duty-label { color: var(–text-dim); letter-spacing: 1px; font-size: 16px; }
-.duty-val { color: var(–white); font-weight: 600; }
+.duty-label { color: var(--text-dim); letter-spacing: 1px; font-size: 16px; }
+.duty-val { color: var(--white); font-weight: 600; }
 .duty-val.warn { color: #ffd54f; }
-.duty-val.danger { color: var(–red); }
-
-/* 集計パネル */
+.duty-val.danger { color: var(--red); }
 .summary {
-display: grid;
-grid-template-columns: 1fr 1fr 1fr;
-gap: 8px;
-margin-bottom: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 .sum-box {
-background: var(–panel);
-border: 1px solid var(–border);
-border-radius: 8px;
-padding: 10px 8px;
-text-align: center;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 8px;
+  text-align: center;
 }
 .sum-label {
-font-family: var(–mono);
-font-size: 16px;
-color: var(–text-dim);
-letter-spacing: 1px;
-margin-bottom: 3px;
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-bottom: 3px;
 }
 .sum-value {
-font-family: var(–mono);
-font-size: 22px;
-font-weight: 700;
-color: var(–white);
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--white);
 }
 .sum-sub {
-font-size: 16px;
-color: var(–text-dim);
-margin-top: 2px;
+  font-size: 16px;
+  color: var(--text-dim);
+  margin-top: 2px;
 }
 
 </style>
@@ -1049,9 +1024,7 @@ margin-top: 2px;
   </div>
 </div>
 
-<script>
-// ============ STATE ============
-const STORAGE = {
+<script>const STORAGE = {
   drivers: 'dt_drivers',
   currentDriver: 'dt_current_driver',
   logs: 'dt_logs',
@@ -1069,34 +1042,28 @@ const STORAGE = {
   plans: 'dt_plans',
   gpsEnabled: 'dt_gps_enabled',
   routeToday: 'dt_route_today',
-  odoPlaces: 'dt_odo_places'           // 出庫帰庫地点プリセット
+  odoPlaces: 'dt_odo_places'
 };
-
 let state = {
-  status: 'idle', // idle, drive, rest, work
+  status: 'idle',
   statusLabel: '待機中',
   statusStart: null,
   road: '一般道',
   load: '空車',
-  // 稼働時間計算用
-  dutyStart: null,       // 出庫時刻
-  contDriveStart: null,  // 現在の連続運転開始
-  contDriveAccum: 0,     // 連続運転の累積ms(運転中のみ加算、休憩でリセット)
-  totalRest: 0,          // 本日総休憩ms
+  dutyStart: null,
+  contDriveStart: null,
+  contDriveAccum: 0,
+  totalRest: 0,
   alertedContDrive: false,
   alertedDuty: false,
-  // 集計用
-  fuels: [],       // {time, liter, yen, odo}
-  tolls: [],       // {time, from, to, yen}
-  odoStart: null,  // 出庫時オドメーター
-  odoEnd: null     // 帰庫時オドメーター
+  fuels: [],
+  tolls: [],
+  odoStart: null,
+  odoEnd: null
 };
-
 let logs = [];
 let drivers = [];
 let currentDriverId = '';
-
-// ============ INIT ============
 function init() {
   loadState();
   loadDrivers();
@@ -1115,17 +1082,13 @@ function init() {
   loadCurrentNotice();
   startClock();
   setInterval(tick, 1000);
-  // GPS起動(ONなら)
   if (gpsEnabled) startGps();
-  // 継続中の運行があれば通知
   if (state.dutyStart) {
     const h = ((Date.now() - state.dutyStart) / 3600000).toFixed(1);
     setTimeout(() => showAlert(`▶ 運行継続中 (${h}時間経過)`, 'info'), 800);
   }
-  // 車検・保険期限チェック
   setTimeout(checkVehicleExpiry, 1500);
 }
-
 function checkVehicleExpiry() {
   if (!currentDriverId) return;
   const active = getActiveVehicle();
@@ -1142,13 +1105,11 @@ function checkVehicleExpiry() {
     else setTimeout(() => showAlert(`△ 保険満了まで${insDays}日`, 'warn'), 500);
   }
 }
-
 function loadState() {
   const saved = localStorage.getItem(STORAGE.state);
   if (saved) {
     try {
       const s = JSON.parse(saved);
-      // 日付が変わってても拘束中なら継続（長距離運行対応）
       if (s.date === todayKey() || (s.state && s.state.dutyStart)) {
         state = { ...state, ...s.state };
       }
@@ -1176,10 +1137,8 @@ function loadLogs() {
     if (data.date === todayKey()) {
       logs = data.logs || [];
     } else if (state.dutyStart) {
-      // 拘束中なら日付をまたいでもログを維持
       logs = data.logs || [];
     } else {
-      // 昨日のログを履歴へ保存
       if (data.logs && data.logs.length > 0) {
         archiveLogs(data.date, data.logs);
       }
@@ -1197,14 +1156,11 @@ function archiveLogs(date, logsToArchive) {
   const saved = localStorage.getItem(STORAGE.history);
   const hist = saved ? JSON.parse(saved) : {};
   hist[date] = logsToArchive;
-  // 30日分だけ保持
   const keys = Object.keys(hist).sort().reverse().slice(0, 30);
   const trimmed = {};
   keys.forEach(k => trimmed[k] = hist[k]);
   localStorage.setItem(STORAGE.history, JSON.stringify(trimmed));
 }
-
-// ============ UTIL ============
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -1222,8 +1178,6 @@ function fmtDuration(ms) {
   const m = Math.floor((s % 3600) / 60);
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
 }
-
-// ============ CLOCK & TICK ============
 function startClock() {
   const update = () => {
     document.getElementById('clock').textContent = fmtTimeSec(new Date());
@@ -1231,17 +1185,12 @@ function startClock() {
   update();
   setInterval(update, 1000);
 }
-
 function tick() {
-  // お知らせ切替チェック(2時間毎)
   checkNoticeUpdate();
-  // 経過時間更新
   if (state.statusStart) {
     const elapsed = Date.now() - state.statusStart;
     document.getElementById('statusTime').textContent = `${fmtDuration(elapsed)}経過`;
   }
-
-  // 連続運転時間（運転中のみ）
   let contDrive = state.contDriveAccum;
   if (state.status === 'drive' && state.contDriveStart) {
     contDrive += Date.now() - state.contDriveStart;
@@ -1258,8 +1207,6 @@ function tick() {
   } else if (contDrive >= 3.5 * 3600 * 1000) {
     contEl.className = 'duty-val warn';
   }
-
-  // 拘束時間 (基本13h、最大15h)
   if (state.dutyStart) {
     const duty = Date.now() - state.dutyStart;
     const dutyEl = document.getElementById('dutyTime');
@@ -1276,27 +1223,20 @@ function tick() {
       dutyEl.textContent = `${fmtDuration(duty)} / 15:00 (延長中)`;
     }
   }
-
-  // 総休憩
   let rest = state.totalRest;
   if (state.status === 'rest' && state.statusStart) {
     rest += Date.now() - state.statusStart;
   }
   document.getElementById('restTime').textContent = fmtDuration(rest);
-
-  // インターバル表示
   const intervalEl = document.getElementById('intervalVal');
   if (intervalEl) {
     if (!currentDriverId) {
-      // ドライバー未選択
       intervalEl.textContent = '--:--';
       intervalEl.className = 'duty-val';
     } else if (state.dutyStart) {
-      // 拘束中
       intervalEl.textContent = '拘束中';
       intervalEl.className = 'duty-val';
     } else {
-      // 休息期間中
       const lastEnd = getLastEnd(currentDriverId);
       if (lastEnd) {
         const interval = Date.now() - lastEnd;
@@ -1312,9 +1252,6 @@ function tick() {
     }
   }
 }
-
-// ============ SPEECH ============
-// 読み上げ辞書（TTSが誤読する漢字の置換）
 const SPEECH_DICT = {
   '荷降': 'におろし',
   '荷積み': 'にづみ',
@@ -1341,7 +1278,6 @@ function speak(text) {
   if (!('speechSynthesis' in window)) return;
   try {
     window.speechSynthesis.cancel();
-    // カッコ内の地名等は読まない
     const cleaned = text.replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
     const u = new SpeechSynthesisUtterance(speakText(cleaned));
     u.lang = 'ja-JP';
@@ -1351,8 +1287,6 @@ function speak(text) {
     window.speechSynthesis.speak(u);
   } catch(e) {}
 }
-
-// ============ EVENTS ============
 function logEvent(label, newStatus, extra = {}) {
   if (!currentDriverId) {
     showAlert('ドライバーを選択してください', 'info');
@@ -1360,13 +1294,9 @@ function logEvent(label, newStatus, extra = {}) {
   }
   const now = Date.now();
   const d = new Date(now);
-
-  // ステータス遷移処理
   const baseAction = extra.baseAction || label;
-  // 出庫の場合、拘束開始
   if (baseAction === '出庫' && !state.dutyStart) {
     state.dutyStart = now;
-    // インターバルチェック（前回帰庫から11時間以上が基本、9時間下限）
     const lastEnd = getLastEnd(currentDriverId);
     if (lastEnd) {
       const interval = now - lastEnd;
@@ -1378,8 +1308,6 @@ function logEvent(label, newStatus, extra = {}) {
       }
     }
   }
-
-  // 現在の状態から抜ける時の処理
   if (state.status === 'drive' && state.contDriveStart) {
     state.contDriveAccum += now - state.contDriveStart;
     state.contDriveStart = null;
@@ -1387,43 +1315,31 @@ function logEvent(label, newStatus, extra = {}) {
   if (state.status === 'rest' && state.statusStart) {
     const restDur = now - state.statusStart;
     state.totalRest += restDur;
-    // 30分以上の休憩で連続運転リセット
     if (restDur >= 30 * 60 * 1000) {
       state.contDriveAccum = 0;
       state.alertedContDrive = false;
     }
   }
-
-  // 新ステータスへ
   state.status = newStatus;
   state.statusLabel = label;
   state.statusStart = now;
-
   if (newStatus === 'drive') {
     state.contDriveStart = now;
   }
-
-  // 帰庫でリセット準備（ログは残す）
   if (baseAction === '帰庫') {
-    // 実車のまま帰庫時は警告
     if (state.load === '実車') {
       setTimeout(() => showAlert('⚠️ 実車のまま帰庫しています。荷降しを確認してください', 'warn'), 500);
     }
-    // 次回出庫時のインターバル計算用に保存
     setLastEnd(currentDriverId, now);
     state.dutyStart = null;
     state.contDriveStart = null;
     state.contDriveAccum = 0;
   }
-
-  // === 自動切替ロジック ===
   let autoLoadChanged = null;
   if (baseAction === '荷積' && state.load === '空車') {
     state.load = '実車';
     autoLoadChanged = '実車';
   }
-
-  // ログ追加
   const entry = {
     time: now,
     label: label,
@@ -1441,31 +1357,24 @@ function logEvent(label, newStatus, extra = {}) {
   renderLogs();
   speak(`${label}をします`);
   showAlert(`✓ ${label}を記録`, 'info');
-
-  // 自動切替後のフィードバック（荷積のみ）
   if (autoLoadChanged) {
     setTimeout(() => {
       speak(`${autoLoadChanged}です`);
       showAlert(`自動: ${autoLoadChanged}に切替`, 'info');
     }, 1200);
   }
-
-  // 荷降時は確認モーダル（実車状態の時のみ）
   if (baseAction === '荷降' && state.load === '実車') {
     setTimeout(() => {
       document.getElementById('unloadConfirmModal').classList.add('show');
     }, 800);
   }
 }
-
-// 荷降確認の応答処理
 function confirmUnload(stillLoaded) {
   document.getElementById('unloadConfirmModal').classList.remove('show');
   if (!stillLoaded) {
     state.load = '空車';
     updateToggleUI();
     saveState();
-    // 最後のログのload値も更新
     if (logs.length > 0) {
       logs[logs.length - 1].load = '空車';
       saveLogs();
@@ -1475,7 +1384,6 @@ function confirmUnload(stillLoaded) {
     showAlert('自動: 空車に切替', 'info');
   }
 }
-
 function updateStatusUI() {
   const el = document.getElementById('statusValue');
   el.textContent = state.statusLabel;
@@ -1483,20 +1391,16 @@ function updateStatusUI() {
   if (state.status === 'idle') el.classList.add('idle');
   if (state.status === 'rest') el.classList.add('rest');
 }
-
 function updateSummaryUI() {
-  // 給油集計
   const myFuels = state.fuels.filter(f => f.driver === currentDriverId);
   const totalL = myFuels.reduce((s, f) => s + (parseFloat(f.liter) || 0), 0);
   const totalFY = myFuels.reduce((s, f) => s + (parseInt(f.yen) || 0), 0);
   document.getElementById('sumFuel').textContent = totalL.toFixed(1);
   document.getElementById('sumFuelYen').textContent = totalFY > 0 ? '¥' + totalFY.toLocaleString() : '-';
-  // 高速集計
   const myTolls = state.tolls.filter(t => t.driver === currentDriverId);
   const totalTY = myTolls.reduce((s, t) => s + (parseInt(t.yen) || 0), 0);
   document.getElementById('sumToll').textContent = '¥' + totalTY.toLocaleString();
   document.getElementById('sumTollCount').textContent = myTolls.length;
-  // オドメーター
   let odoText = '--';
   if (state.odoStart && state.odoEnd) {
     odoText = (state.odoEnd - state.odoStart).toString();
@@ -1505,7 +1409,6 @@ function updateSummaryUI() {
   }
   document.getElementById('sumOdo').textContent = odoText;
 }
-
 function updateToggleUI() {
   document.querySelectorAll('.toggle-opt').forEach(opt => {
     const type = opt.dataset.toggle;
@@ -1514,7 +1417,6 @@ function updateToggleUI() {
     if (type === 'load') opt.classList.toggle('active', state.load === val);
   });
 }
-
 document.querySelectorAll('.toggle-opt').forEach(opt => {
   opt.addEventListener('click', () => {
     const type = opt.dataset.toggle;
@@ -1523,7 +1425,6 @@ document.querySelectorAll('.toggle-opt').forEach(opt => {
     if (type === 'load') state.load = val;
     updateToggleUI();
     saveState();
-    // トグル変更もログ
     if (currentDriverId) {
       const label = `${type === 'road' ? '道路' : '積載'}: ${val}`;
       const entry = {
@@ -1537,14 +1438,11 @@ document.querySelectorAll('.toggle-opt').forEach(opt => {
       logs.push(entry);
       saveLogs();
       renderLogs();
-      // 音声読み上げ（切替時）
       const speakText = `${val}です`;
       speak(speakText);
     }
   });
 });
-
-// ============ LOGS RENDER ============
 function renderLogs() {
   const list = document.getElementById('logList');
   const filtered = logs.filter(l => l.driver === currentDriverId);
@@ -1553,12 +1451,10 @@ function renderLogs() {
     list.innerHTML = '<div class="log-empty">記録なし（操作ボタンをタップして記録開始）</div>';
     return;
   }
-  // 時刻でソート
   const sorted = filtered.slice().sort((a,b) => b.time - a.time);
   list.innerHTML = sorted.map(l => {
     const t = new Date(l.time);
     const meta = `${l.road}/${l.load}`;
-    // ログのインデックスをlogs配列から取得
     const idx = logs.indexOf(l);
     return `<div class="log-entry" onclick="openEditLog(${idx})" style="cursor:pointer;">
       <div class="log-time">${fmtTime(t)}</div>
@@ -1567,11 +1463,8 @@ function renderLogs() {
     </div>`;
   }).join('');
 }
-
-// 積地・降地プリセット
 let loadSites = [];
 let unloadSites = [];
-
 const DEFAULT_LOAD_SITES = ['住之江','堺','松原','枚方','西宮','港区','福島区','摂津','茨木','東住吉','美原','門真','八尾'];
 const DEFAULT_UNLOAD_SITES = [
   '神戸市内',
@@ -1585,7 +1478,6 @@ const DEFAULT_UNLOAD_SITES = [
   '奈良',
   '和歌山'
 ];
-
 function loadSitePresets() {
   const ls = localStorage.getItem(STORAGE.loadSites);
   if (ls) {
@@ -1601,12 +1493,10 @@ function loadSitePresets() {
   if (unloadSites.length === 0) {
     unloadSites = DEFAULT_UNLOAD_SITES.map(name => ({ name, count: 0 }));
   } else {
-    // 旧プリセット("中河内"など単体名)を検出したら新形式に置換
     const hasOldFormat = unloadSites.some(s =>
       ['中河内','南河内','北摂','泉州','堺','京都'].includes(s.name)
     );
     if (hasOldFormat) {
-      // ユーザーが追加したカスタム項目は保持
       const customs = unloadSites.filter(s =>
         !['中河内','南河内','北摂','泉州','堺','京都','神戸市内','大阪市内','奈良','和歌山'].includes(s.name)
       );
@@ -1643,7 +1533,6 @@ function removeSitePreset(type, name) {
   }
   saveSitePresets();
 }
-
 function renderSitePresets(type) {
   const arr = type === 'load' ? loadSites : unloadSites;
   const elId = type === 'load' ? 'loadSitePresets' : 'unloadSitePresets';
@@ -1661,7 +1550,6 @@ function renderSitePresets(type) {
     >${s.name}</div>
   `).join('');
 }
-
 function openSiteModal(type) {
   if (!currentDriverId) { showAlert('ドライバーを選択してください', 'info'); return; }
   renderSitePresets(type);
@@ -1683,7 +1571,6 @@ function saveSiteEvent(type, siteName) {
   const baseLabel = type === 'load' ? '荷積' : '荷降';
   const label = siteName ? `${baseLabel} (${siteName})` : baseLabel;
   if (siteName) addSitePreset(type, siteName);
-  // 配送先メモを取得
   const prefix = type === 'load' ? 'load' : 'unload';
   const shipper = document.getElementById(prefix + 'Shipper').value.trim();
   const cargo = document.getElementById(prefix + 'Cargo').value.trim();
@@ -1700,17 +1587,13 @@ function saveCustomSite(type) {
   if (!name) { showAlert('地名を入力してください', 'info'); return; }
   saveSiteEvent(type, name);
 }
-
-// ============ PRESETS ============
-let fuelPresets = [];   // [{liter, count}]
-let tollPresets = [];   // [{from, to, yen, count}]
-
+let fuelPresets = [];
+let tollPresets = [];
 function loadPresets() {
   const fp = localStorage.getItem(STORAGE.fuelPresets);
   if (fp) {
     try { fuelPresets = JSON.parse(fp); } catch(e) { fuelPresets = []; }
   }
-  // 初期プリセット（履歴なしのとき）
   if (fuelPresets.length === 0) {
     fuelPresets = [
       { liter: 20, count: 0, initial: true },
@@ -1738,7 +1621,6 @@ function addFuelPreset(liter) {
   } else {
     fuelPresets.push({ liter, count: 1 });
   }
-  // 使用回数順にソート（最大12件）
   fuelPresets.sort((a, b) => (b.count || 0) - (a.count || 0));
   if (fuelPresets.length > 12) fuelPresets = fuelPresets.slice(0, 12);
   savePresets();
@@ -1763,8 +1645,6 @@ function removeTollPreset(idx) {
   tollPresets.splice(idx, 1);
   savePresets();
 }
-
-// 長押し検出用
 let pressTimer = null;
 function startPress(callback) {
   pressTimer = setTimeout(() => {
@@ -1776,11 +1656,10 @@ function cancelPress() {
   if (pressTimer) {
     clearTimeout(pressTimer);
     pressTimer = null;
-    return false; // 短押し
+    return false;
   }
-  return true; // 長押し完了済み
+  return true;
 }
-
 function renderFuelPresets() {
   const el = document.getElementById('fuelPresets');
   if (fuelPresets.length === 0) {
@@ -1795,7 +1674,6 @@ function renderFuelPresets() {
     >${p.liter}L</div>
   `).join('');
 }
-
 function renderTollPresets() {
   const el = document.getElementById('tollPresets');
   if (tollPresets.length === 0) {
@@ -1820,8 +1698,6 @@ function applyTollPreset(idx) {
   document.getElementById('tollTo').value = p.to || '';
   document.getElementById('tollYen').value = p.yen;
 }
-
-// ============ FUEL / TOLL / ODO MODALS ============
 let fuelYenEnabled = false;
 function toggleFuelYen() {
   fuelYenEnabled = !fuelYenEnabled;
@@ -1839,14 +1715,12 @@ function toggleFuelYen() {
     input.value = '';
   }
 }
-
 function openFuelModal() {
   if (!currentDriverId) { showAlert('ドライバーを選択してください', 'info'); return; }
   document.getElementById('fuelLiter').value = '';
   document.getElementById('fuelYen').value = '';
   document.getElementById('fuelOdo').value = '';
   renderFuelPresets();
-  // トグルを初期状態(OFF)に
   fuelYenEnabled = true;
   toggleFuelYen();
   document.getElementById('fuelModal').classList.add('show');
@@ -1864,7 +1738,6 @@ function saveFuel() {
   const labelText = yen ? `給油 ${liter}L/¥${yen.toLocaleString()}` : `給油 ${liter}L`;
   logEvent(labelText, 'work', { fuelLiter: liter, fuelYen: yen, fuelOdo: odo });
 }
-
 function openTollModal() {
   if (!currentDriverId) { showAlert('ドライバーを選択してください', 'info'); return; }
   document.getElementById('tollFrom').value = '';
@@ -1886,7 +1759,6 @@ function saveToll() {
   const label = `高速 ${from||'?'}→${to||'?'} ¥${yen.toLocaleString()}`;
   logEvent(label, 'work', { tollFrom: from, tollTo: to, tollYen: yen });
 }
-
 let pendingOdoType = null;
 function getLastOdometer(driverId) {
   const raw = localStorage.getItem(STORAGE.lastOdometer);
@@ -1905,7 +1777,6 @@ function setLastOdometer(driverId, value) {
   obj[driverId] = value;
   localStorage.setItem(STORAGE.lastOdometer, JSON.stringify(obj));
 }
-
 function openOdoModal(type) {
   if (!currentDriverId) { showAlert('ドライバーを選択してください', 'info'); return; }
   pendingOdoType = type;
@@ -1944,7 +1815,6 @@ function saveOdo() {
     state.odoEnd = val;
     setLastOdometer(currentDriverId, val);
   }
-  // 地点名をプリセットに記録
   if (place) addOdoPlace(place);
   saveState();
   const type = pendingOdoType;
@@ -1962,8 +1832,6 @@ function skipOdo() {
   const label = place ? `${type} (${place})` : type;
   logEvent(label, newStatus, { place: place, baseAction: type });
 }
-
-// 出庫帰庫地点プリセット
 function getOdoPlaces() {
   const raw = localStorage.getItem(STORAGE.odoPlaces);
   if (!raw) return [];
@@ -2004,8 +1872,6 @@ function renderOdoPlaceChips() {
     >${p.name}</div>
   `).join('');
 }
-
-// ============ インターバル管理 ============
 function getLastEnd(driverId) {
   const raw = localStorage.getItem(STORAGE.lastEnd);
   if (!raw) return null;
@@ -2023,12 +1889,9 @@ function setLastEnd(driverId, timestamp) {
   obj[driverId] = timestamp;
   localStorage.setItem(STORAGE.lastEnd, JSON.stringify(obj));
 }
-
-// ============ 点呼記録 ============
 let tenkoSelection = { health: '良好', check: '異常なし' };
 function openTenkoModal() {
   if (!currentDriverId) { showAlert('ドライバーを選択してください', 'info'); return; }
-  // 出庫前なら乗務前点呼、それ以降なら乗務後点呼
   const type = state.dutyStart ? '乗務後点呼' : '乗務前点呼';
   document.getElementById('tenkoTitle').textContent = `▼ ${type}`;
   document.getElementById('tenkoAlcohol').value = '0.00';
@@ -2055,21 +1918,17 @@ function saveTenko() {
   const sleep = parseFloat(document.getElementById('tenkoSleep').value) || null;
   const note = document.getElementById('tenkoNote').value.trim();
   const type = state.dutyStart ? '乗務後点呼' : '乗務前点呼';
-  // 点呼データをログに埋め込み
   const tenkoData = {
     alcohol, health: tenkoSelection.health, check: tenkoSelection.check,
     sleep, note, type
   };
   closeTenkoModal();
-  // アルコール検知0.15mg/L超は運転不可
   if (alcohol >= 0.15) {
     showAlert('⚠️ アルコール検知値が基準値(0.15)以上です！運転できません', 'warn');
   }
   const label = `${type} (酒${alcohol.toFixed(2)}/${tenkoSelection.health}/${tenkoSelection.check})`;
   logEvent(label, state.status, { tenkoData });
 }
-
-// ============ 集計ビュー ============
 let currentStatsPeriod = 'week';
 function openStatsModal() {
   if (!currentDriverId) { showAlert('ドライバーを選択してください', 'info'); return; }
@@ -2077,14 +1936,11 @@ function openStatsModal() {
   document.getElementById('statsModal').classList.add('show');
 }
 function closeStatsModal() { document.getElementById('statsModal').classList.remove('show'); }
-
 function getPeriodLogs(period) {
-  // history と 今日のログを結合して、期間内のものを返す
   const raw = localStorage.getItem(STORAGE.history);
   const hist = raw ? JSON.parse(raw) : {};
   const today = todayKey();
   const all = { ...hist, [today]: logs };
-  // 期間決定
   const now = new Date();
   let startDate;
   if (period === 'week') {
@@ -2093,7 +1949,7 @@ function getPeriodLogs(period) {
   } else {
     startDate = new Date(now.getFullYear(), now.getMonth(), 1);
   }
-  const result = {}; // { date: [logs...] }
+  const result = {};
   Object.keys(all).sort().forEach(d => {
     const dt = new Date(d);
     if (dt >= startDate && dt <= now) {
@@ -2103,15 +1959,11 @@ function getPeriodLogs(period) {
   });
   return result;
 }
-
 function calcDayStats(dayLogs) {
-  // 1日分の集計
   let dutyMs = 0, restMs = 0, driveMs = 0;
   let startTime = null, endTime = null;
   let odoStart = null, odoEnd = null;
   let fuelL = 0, fuelYen = 0, tollYen = 0;
-
-  // 出庫〜帰庫を探す
   const sorted = dayLogs.slice().sort((a,b) => a.time - b.time);
   sorted.forEach(l => {
     if (l.label === '出庫' || (l.baseAction === '出庫')) {
@@ -2126,21 +1978,16 @@ function calcDayStats(dayLogs) {
     if (l.tollYen) { tollYen += l.tollYen; }
   });
   if (startTime && endTime) dutyMs = endTime - startTime;
-
-  // 運転時間・休憩時間をstatusベースで推定
-  // 連続するログ間の時間を、その区間の状態に応じて配分
   for (let i = 0; i < sorted.length - 1; i++) {
     const dur = sorted[i+1].time - sorted[i].time;
     const lbl = sorted[i].label;
     if (lbl.includes('運転') || lbl.includes('出庫')) driveMs += dur;
     else if (lbl.includes('休憩')) restMs += dur;
   }
-
   const distance = (odoStart && odoEnd) ? (odoEnd - odoStart) : 0;
   const fuelEff = (fuelL > 0 && distance > 0) ? (distance / fuelL) : null;
   return { dutyMs, restMs, driveMs, distance, fuelL, fuelYen, tollYen, fuelEff, odoStart, odoEnd };
 }
-
 function showStats(period) {
   currentStatsPeriod = period;
   document.getElementById('statsWeekBtn').classList.toggle('primary', period === 'week');
@@ -2152,7 +1999,6 @@ function showStats(period) {
     el.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:20px;">記録なし</div>';
     return;
   }
-  // 合計計算
   let totalDuty = 0, totalDrive = 0, totalRest = 0, totalDist = 0;
   let totalFuelL = 0, totalFuelYen = 0, totalToll = 0;
   const rows = dates.map(d => {
@@ -2186,7 +2032,6 @@ function showStats(period) {
   </div>`;
   el.innerHTML = summary + '<div style="max-height:280px;overflow-y:auto;">' + rows + '</div>';
 }
-
 function exportStatsCSV() {
   const periodLogs = getPeriodLogs(currentStatsPeriod);
   const dates = Object.keys(periodLogs).sort();
@@ -2216,13 +2061,10 @@ function exportStatsCSV() {
   URL.revokeObjectURL(url);
   showAlert('✓ CSV出力', 'info');
 }
-
-// ============ 燃費評価 & 注意事項 ============
 function calcFuelStats(period) {
   const periodLogs = getPeriodLogs(period);
   const dates = Object.keys(periodLogs).sort();
   if (dates.length === 0) return null;
-
   let totalDist = 0, totalFuel = 0;
   const dailyEff = [];
   dates.forEach(d => {
@@ -2236,25 +2078,21 @@ function calcFuelStats(period) {
   const avgEff = (totalFuel > 0 && totalDist > 0) ? (totalDist / totalFuel) : null;
   return { avgEff, totalDist, totalFuel, dailyEff, days: dates.length };
 }
-
 function calcViolations(period) {
   const periodLogs = getPeriodLogs(period);
   const dates = Object.keys(periodLogs).sort();
   if (dates.length === 0) return null;
-
   let contDriveViolations = 0;
   let dutyViolations = 0;
   let dutyWarnings = 0;
   let intervalViolations = 0;
   let intervalWarnings = 0;
   let alcoholViolations = 0;
-
   let prevDayEnd = null;
   dates.forEach(d => {
     const dayLogs = periodLogs[d].slice().sort((a,b) => a.time - b.time);
     let dayStart = null, dayEnd = null;
     let contDriveMs = 0, contStart = null;
-
     dayLogs.forEach(l => {
       if (l.label === '出庫' || l.baseAction === '出庫') {
         dayStart = l.time;
@@ -2275,7 +2113,6 @@ function calcViolations(period) {
       }
       if (l.tenkoData && l.tenkoData.alcohol >= 0.15) alcoholViolations++;
     });
-
     if (contDriveMs > 4 * 3600000) contDriveViolations++;
     if (dayStart && dayEnd) {
       const h = (dayEnd - dayStart) / 3600000;
@@ -2284,30 +2121,24 @@ function calcViolations(period) {
     }
     if (dayEnd) prevDayEnd = dayEnd;
   });
-
   return {
     contDriveViolations, dutyViolations, dutyWarnings,
     intervalViolations, intervalWarnings, alcoholViolations,
     days: dates.length
   };
 }
-
 function openScoreModal() {
   if (!currentDriverId) { showAlert('ドライバーを選択してください', 'info'); return; }
   const el = document.getElementById('scoreContent');
-
   const weekFuel = calcFuelStats('week');
   const monthFuel = calcFuelStats('month');
   const weekViol = calcViolations('week');
   const monthViol = calcViolations('month');
-
   if (!weekFuel && !monthFuel) {
     el.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:20px;">記録なし</div>';
     document.getElementById('scoreModal').classList.add('show');
     return;
   }
-
-  // 燃費評価ブロック
   function renderFuelBlock() {
     if (!weekFuel || !weekFuel.avgEff) {
       return `<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;">
@@ -2315,11 +2146,9 @@ function openScoreModal() {
         <div style="font-size:11px;color:var(--text-dim);">給油量と走行距離の記録が揃うと計算されます</div>
       </div>`;
     }
-    // 前週比較
     let compareText = '';
     let compareColor = 'var(--text-dim)';
     if (monthFuel && monthFuel.avgEff) {
-      // 今週と月全体の比較
       const diff = weekFuel.avgEff - monthFuel.avgEff;
       const diffPct = (diff / monthFuel.avgEff * 100).toFixed(1);
       if (Math.abs(diff) < 0.1) {
@@ -2333,7 +2162,6 @@ function openScoreModal() {
         compareColor = '#ffd54f';
       }
     }
-    // 日別の最高/最低
     let bestWorst = '';
     if (weekFuel.dailyEff.length >= 2) {
       const sorted = weekFuel.dailyEff.slice().sort((a,b) => b.eff - a.eff);
@@ -2355,8 +2183,6 @@ function openScoreModal() {
       ${bestWorst}
     </div>`;
   }
-
-  // 月別燃費ブロック
   function renderMonthFuel() {
     if (!monthFuel || !monthFuel.avgEff) return '';
     return `<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px;">
@@ -2367,8 +2193,6 @@ function openScoreModal() {
       </div>
     </div>`;
   }
-
-  // 注意事項ブロック
   function renderViolationBlock(label, v) {
     if (!v) return '';
     const items = [];
@@ -2378,9 +2202,7 @@ function openScoreModal() {
     if (v.contDriveViolations > 0) items.push({ icon:'⚠️', text:`連続運転4時間超過`, count:v.contDriveViolations, danger:true });
     if (v.dutyWarnings > 0) items.push({ icon:'△', text:`拘束時間13時間超過(延長)`, count:v.dutyWarnings, danger:false });
     if (v.intervalWarnings > 0) items.push({ icon:'△', text:`インターバル11時間未満`, count:v.intervalWarnings, danger:false });
-
     const header = `<div style="font-size:10px;color:var(--text-dim);font-family:var(--mono);margin-bottom:6px;">📋 ${label} 注意事項 (${v.days}日稼働)</div>`;
-
     if (items.length === 0) {
       return `<div style="background:var(--bg);border:1px solid var(--green);border-radius:8px;padding:12px;margin-bottom:10px;">
         ${header}
@@ -2398,7 +2220,6 @@ function openScoreModal() {
       ${rows}
     </div>`;
   }
-
   el.innerHTML = renderFuelBlock() + renderMonthFuel() +
     renderViolationBlock('直近7日間', weekViol) +
     renderViolationBlock('今月', monthViol) +
@@ -2408,18 +2229,14 @@ function openScoreModal() {
   document.getElementById('scoreModal').classList.add('show');
 }
 function closeScoreModal() { document.getElementById('scoreModal').classList.remove('show'); }
-
-// ============ バックアップ/復元 ============
 function openBackupModal() { document.getElementById('backupModal').classList.add('show'); }
 function closeBackupModal() { document.getElementById('backupModal').classList.remove('show'); }
-
 function exportBackup() {
   const backup = {
     version: '2.1',
     exportedAt: new Date().toISOString(),
     data: {}
   };
-  // すべてのSTORAGEキーを収集
   Object.keys(STORAGE).forEach(key => {
     const val = localStorage.getItem(STORAGE[key]);
     if (val !== null) backup.data[STORAGE[key]] = val;
@@ -2436,7 +2253,6 @@ function exportBackup() {
   closeBackupModal();
   showAlert('✓ バックアップを保存しました', 'info');
 }
-
 function importBackup(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -2449,7 +2265,6 @@ function importBackup(event) {
     try {
       const backup = JSON.parse(e.target.result);
       if (!backup.data) throw new Error('不正なファイル');
-      // 全キーをクリアしてから復元
       Object.keys(STORAGE).forEach(key => localStorage.removeItem(STORAGE[key]));
       Object.keys(backup.data).forEach(key => {
         localStorage.setItem(key, backup.data[key]);
@@ -2464,10 +2279,7 @@ function importBackup(event) {
   reader.readAsText(file);
   event.target.value = '';
 }
-
-// ============ お知らせ機能 ============
 const NOTICES = [
-  // アルコール・健康管理 (15)
   { cat: 'アルコール', icon: '🍺', text: '出庫前のアルコールチェックは必ず実施しましょう。数値は0.00が基本です。' },
   { cat: 'アルコール', icon: '🍺', text: '前日の飲酒は翌朝にも残ることがあります。睡眠をとっても抜けきらない場合があるので要注意。' },
   { cat: 'アルコール', icon: '⚠️', text: '道交法の酒気帯び基準は呼気0.15mg/L以上。一口でも飲んだら運転はNGです。' },
@@ -2483,8 +2295,6 @@ const NOTICES = [
   { cat: '健康管理', icon: '🫁', text: '深呼吸は簡単な集中力リセット法。信号待ちで3回深呼吸してみましょう。' },
   { cat: 'アルコール', icon: '🚫', text: '「少しだけなら」は命取り。アルコールに絶対安全量はありません。' },
   { cat: '健康管理', icon: '🩺', text: '定期健康診断は必須。SAS(睡眠時無呼吸症候群)のチェックも重要です。' },
-
-  // 休憩・連続運転 (15)
   { cat: '休憩', icon: '☕', text: '連続運転は4時間まで。それ以前に30分以上の休憩を取りましょう。' },
   { cat: '休憩', icon: '☕', text: '休憩は10分×3回より、1回30分のまとめ休憩の方が疲労回復に効果的です。' },
   { cat: '休憩', icon: '😴', text: '眠気を感じたら15分の仮眠を。短時間でも集中力が戻ります。' },
@@ -2500,8 +2310,6 @@ const NOTICES = [
   { cat: '拘束時間', icon: '📊', text: '運転時間は2日平均で1日9時間、2週平均で1週44時間が上限です。' },
   { cat: '休憩', icon: '🧘', text: '軽い瞑想・マインドフルネスは3分でも効果あり。休憩中にぜひ。' },
   { cat: '連続運転', icon: '🚦', text: '信号待ちや渋滞時は休憩時間にカウントされません。別途休憩を取りましょう。' },
-
-  // 点検・車両管理 (15)
   { cat: '日常点検', icon: '🔧', text: '日常点検は運行前に必ず実施。ブレーキ・タイヤ・ランプ類は重点項目です。' },
   { cat: '日常点検', icon: '⚙️', text: 'エンジンオイル・冷却水・ブレーキ液の液量チェックを忘れずに。' },
   { cat: '日常点検', icon: '🛞', text: 'タイヤの空気圧・溝の深さ・異物の有無を確認。燃費と安全に直結します。' },
@@ -2517,8 +2325,6 @@ const NOTICES = [
   { cat: '日常点検', icon: '🔊', text: 'ホーンの動作確認も日常点検項目。緊急時に鳴らない事態を防ぎましょう。' },
   { cat: '日常点検', icon: '🌡️', text: '冬場はウォッシャー液を不凍タイプに切替。凍結で配管が破損することも。' },
   { cat: '点検', icon: '🔍', text: '異音・異臭・振動は故障のサイン。放置せず早めの整備工場へ。' },
-
-  // 安全運転テクニック (20)
   { cat: '安全運転', icon: '🚗', text: '前車との車間距離は時速と同じメートル以上が目安。急ブレーキ対策です。' },
   { cat: '安全運転', icon: '🚗', text: '雨天時は制動距離が1.5倍に。車間は普段の2倍を意識しましょう。' },
   { cat: '安全運転', icon: '🌫️', text: '濃霧時はフォグランプ＋ハザードで存在を知らせる。速度は半分以下に。' },
@@ -2539,8 +2345,6 @@ const NOTICES = [
   { cat: 'エコドライブ', icon: '💚', text: 'アイドリングストップを徹底。10分の停止で約130ccの燃料節約になります。' },
   { cat: '安全運転', icon: '📱', text: '運転中のスマホ操作は違反。通話もハンズフリー以外は認められません。' },
   { cat: '安全運転', icon: '🎯', text: '目線は遠くに。近くを見過ぎると反応が遅れ、疲労も増します。' },
-
-  // 天候別 (10)
   { cat: '天候', icon: '☔', text: '雨天時は視界不良に注意。ワイパー最速＋デフロスター活用で対応を。' },
   { cat: '天候', icon: '🌨️', text: '積雪予報時はチェーン携行確認。未装着での立ち往生は責任を問われます。' },
   { cat: '天候', icon: '💨', text: '強風時、特に橋の上や山間部では横風注意。ハンドルをしっかり握って。' },
@@ -2551,8 +2355,6 @@ const NOTICES = [
   { cat: '天候', icon: '🌫️', text: '朝霧は谷間や川沿いで発生しやすい。橋の上も凍結注意ポイントです。' },
   { cat: '天候', icon: '❄️', text: '橋の上・トンネル出口は路面凍結が先行しやすい。要警戒ポイントです。' },
   { cat: '天候', icon: '🥶', text: '冬場の始業前は暖機運転を1分ほど。オイル循環を待ってから走り出しを。' },
-
-  // 荷役・積載 (10)
   { cat: '荷役', icon: '📦', text: '荷役作業は腰を痛めやすい。膝を使って持ち上げる正しい姿勢で。' },
   { cat: '荷役', icon: '🧤', text: '手袋・安全靴の着用は基本。滑りや落下物から身を守ります。' },
   { cat: '積載', icon: '⚖️', text: '重い荷物は下、軽い荷物は上。重心を低く保つと安定走行できます。' },
@@ -2563,8 +2365,6 @@ const NOTICES = [
   { cat: '荷役', icon: '📦', text: '荷物の破損を見つけたら即座に写真撮影。後のクレーム対応に備えて。' },
   { cat: '積載', icon: '📏', text: '荷台からのはみ出しは全長の1/10まで。超過時は許可証が必要です。' },
   { cat: '荷役', icon: '💪', text: '無理な荷役は労災の元。パワーゲートや台車を積極活用しましょう。' },
-
-  // 法令・改善基準告示 (10)
   { cat: '法令', icon: '📖', text: '2024年4月から改善基準告示が改正。拘束時間・休息期間に注意しましょう。' },
   { cat: '法令', icon: '📖', text: '年間時間外労働960時間の上限規制が2024年4月から適用されています。' },
   { cat: '法令', icon: '📖', text: '運転日報は法定書類。最低1年、労基法では5年の保存が望ましいです。' },
@@ -2575,60 +2375,46 @@ const NOTICES = [
   { cat: '法令', icon: '⚠️', text: '過労運転の下命容認は運行管理者の責任。違反は事業停止処分の対象です。' },
   { cat: '法令', icon: '📝', text: '交通事故は小さくても必ず報告。物損でも警察への届出が法的義務です。' },
   { cat: '法令', icon: '📜', text: '運転免許の更新を忘れずに。失効運転は無免許運転と同等の処分対象。' },
-
-  // モチベーション・心構え (5)
   { cat: '心構え', icon: '💪', text: '安全運転は家族への最大のプレゼント。今日も無事故で帰りましょう。' },
   { cat: '心構え', icon: '🎯', text: '「かもしれない運転」を徹底。予測と確認が事故を防ぐ最大の武器です。' },
   { cat: '心構え', icon: '🤝', text: '荷主様への感謝の気持ちが、丁寧な荷扱いにつながります。' },
   { cat: '心構え', icon: '🌟', text: 'プロドライバーの自覚を持って。あなたの運転は会社の信用そのものです。' },
   { cat: '心構え', icon: '❤️', text: '無事故・無違反はお金で買えない価値。継続してこそ本物の技術です。' }
 ];
-
-// 季節イベント（優先表示）
 function getSeasonalNotice() {
   const d = new Date();
   const month = d.getMonth() + 1;
   const date = d.getDate();
-  // 春の全国交通安全運動 (4月6-15日)
   if (month === 4 && date >= 6 && date <= 15) {
     return { cat: '🌸 春の交通安全運動', icon: '🌸', text: '春の全国交通安全運動期間中です。新入生・新社会人の歩行者に注意しましょう。' };
   }
-  // 夏の交通安全運動 (7月中旬)
   if (month === 7 && date >= 11 && date <= 20) {
     return { cat: '☀️ 夏の交通安全運動', icon: '☀️', text: '夏の交通安全運動期間中です。夏休み期間は子供の飛び出しに特に注意を。' };
   }
-  // 秋の全国交通安全運動 (9月21-30日)
   if (month === 9 && date >= 21 && date <= 30) {
     return { cat: '🍂 秋の交通安全運動', icon: '🍂', text: '秋の全国交通安全運動期間中です。日没が早まるので早めのライト点灯を。' };
   }
-  // 年末年始特別警戒 (12月10日-1月10日)
   if ((month === 12 && date >= 10) || (month === 1 && date <= 10)) {
     return { cat: '🎍 年末年始警戒', icon: '🎍', text: '年末年始の交通事故防止運動期間。飲酒運転撲滅・スピードダウンを徹底しましょう。' };
   }
-  // 梅雨 (6月)
   if (month === 6) {
     return { cat: '☔ 梅雨期', icon: '☔', text: '梅雨期はスリップ事故多発時期。タイヤの溝を確認し、車間距離を広めに。' };
   }
-  // 猛暑 (8月)
   if (month === 8) {
     return { cat: '🥵 猛暑期', icon: '🥵', text: '猛暑期は熱中症と車両故障に注意。水分塩分補給とオーバーヒート対策を。' };
   }
-  // 積雪期 (1-2月)
   if (month === 1 || month === 2) {
     return { cat: '❄️ 積雪期', icon: '❄️', text: '積雪・凍結期です。スタッドレスタイヤの装着と早朝の路面凍結に警戒。' };
   }
   return null;
 }
-
 let currentNoticeIndex = -1;
 let lastNoticeChange = 0;
-
 function getShownHistory() {
   const raw = localStorage.getItem('dt_notice_history');
   if (!raw) return [];
   try {
     const arr = JSON.parse(raw);
-    // 7日以上古いものを除外
     const cutoff = Date.now() - 7 * 86400000;
     return arr.filter(x => x.t > cutoff);
   } catch(e) { return []; }
@@ -2638,23 +2424,18 @@ function addShownHistory(idx) {
   hist.push({ idx, t: Date.now() });
   localStorage.setItem('dt_notice_history', JSON.stringify(hist));
 }
-
 function pickNotice() {
-  // 季節イベント優先(5回に1回の確率で)
   const seasonal = getSeasonalNotice();
   if (seasonal && Math.random() < 0.2) {
-    return { notice: seasonal, idx: -1 }; // 季節イベントはインデックスなし
+    return { notice: seasonal, idx: -1 };
   }
-  // 過去7日間に表示したものを除外
   const hist = getShownHistory();
   const shownIdxs = new Set(hist.map(h => h.idx));
   const available = NOTICES.map((_, i) => i).filter(i => !shownIdxs.has(i));
-  // 全部表示済みなら履歴リセット
   const pool = available.length > 0 ? available : NOTICES.map((_, i) => i);
   const idx = pool[Math.floor(Math.random() * pool.length)];
   return { notice: NOTICES[idx], idx };
 }
-
 function showNotice() {
   const { notice, idx } = pickNotice();
   document.getElementById('noticeIcon').textContent = notice.icon;
@@ -2663,12 +2444,10 @@ function showNotice() {
   if (idx >= 0) addShownHistory(idx);
   currentNoticeIndex = idx;
   lastNoticeChange = Date.now();
-  // localStorageに保存（再起動時も維持）
   localStorage.setItem('dt_current_notice', JSON.stringify({
     icon: notice.icon, cat: notice.cat, text: notice.text, t: lastNoticeChange
   }));
 }
-
 function loadCurrentNotice() {
   const raw = localStorage.getItem('dt_current_notice');
   if (!raw) {
@@ -2677,7 +2456,6 @@ function loadCurrentNotice() {
   }
   try {
     const data = JSON.parse(raw);
-    // 2時間以内なら復元、それ以降なら更新
     if (Date.now() - data.t < 2 * 3600 * 1000) {
       document.getElementById('noticeIcon').textContent = data.icon;
       document.getElementById('noticeCategory').textContent = data.cat;
@@ -2688,35 +2466,27 @@ function loadCurrentNotice() {
     }
   } catch(e) { showNotice(); }
 }
-
 function checkNoticeUpdate() {
-  // 2時間経過したら次のお知らせへ
   if (Date.now() - lastNoticeChange >= 2 * 3600 * 1000) {
     showNotice();
   }
 }
-
 function speakNotice() {
   const text = document.getElementById('noticeText').textContent;
   if (text && text !== '準備中...') {
     speak(text);
   }
 }
-// ============ お知らせ END ============
-
-// ============ GPS (補助ツール) ============
 let gpsEnabled = false;
 let gpsWatchId = null;
 let gpsLastPos = null;
-let gpsDistance = 0;      // 本日の累計距離(km)
-let gpsCurrentSpeed = 0;  // 現在速度(km/h)
+let gpsDistance = 0;
+let gpsCurrentSpeed = 0;
 let gpsLastRouteRecord = 0;
 let wakeLock = null;
-
 function loadGpsSettings() {
   const val = localStorage.getItem(STORAGE.gpsEnabled);
   gpsEnabled = val === 'true';
-  // 本日の距離・ルートを復元
   const routeRaw = localStorage.getItem(STORAGE.routeToday);
   if (routeRaw) {
     try {
@@ -2724,7 +2494,6 @@ function loadGpsSettings() {
       if (r.date === todayKey()) {
         gpsDistance = r.distance || 0;
       } else {
-        // 日が変わったらリセット
         localStorage.removeItem(STORAGE.routeToday);
         gpsDistance = 0;
       }
@@ -2754,12 +2523,10 @@ function appendRoutePoint(lat, lng, speed) {
   }
   data.points = data.points || [];
   data.points.push({ t: Date.now(), lat, lng, speed });
-  // 最大1000ポイント（メモリ圧迫防止）
   if (data.points.length > 1000) data.points = data.points.slice(-1000);
   data.distance = gpsDistance;
   localStorage.setItem(STORAGE.routeToday, JSON.stringify(data));
 }
-
 function toggleGps() {
   gpsEnabled = !gpsEnabled;
   localStorage.setItem(STORAGE.gpsEnabled, gpsEnabled);
@@ -2784,7 +2551,6 @@ function updateGpsToggleUI() {
     dot.style.left = '2px';
   }
 }
-
 function startGps() {
   if (!navigator.geolocation) {
     showAlert('この端末はGPS非対応', 'warn');
@@ -2809,19 +2575,16 @@ function stopGps() {
   document.getElementById('gpsPanel').style.display = 'none';
   releaseWakeLock();
 }
-
 function onGpsSuccess(pos) {
   const ind = document.getElementById('gpsIndicator');
   if (ind) {
     ind.style.background = 'var(--green)';
     ind.style.boxShadow = '0 0 6px var(--green)';
   }
-  // 速度取得 (m/s → km/h)
   let speed = pos.coords.speed;
   if (speed !== null && !isNaN(speed) && speed >= 0) {
     gpsCurrentSpeed = Math.max(0, speed * 3.6);
   } else if (gpsLastPos) {
-    // 速度未提供の場合、距離/時間から推定
     const dt = (pos.timestamp - gpsLastPos.t) / 1000;
     if (dt > 0 && dt < 60) {
       const d = haversine(gpsLastPos.lat, gpsLastPos.lng, pos.coords.latitude, pos.coords.longitude);
@@ -2829,21 +2592,15 @@ function onGpsSuccess(pos) {
     }
   }
   document.getElementById('gpsSpeed').textContent = gpsCurrentSpeed.toFixed(0);
-
-  // 距離計算（運転中または速度10km/h以上の時のみ加算）
   if (gpsLastPos && (state.status === 'drive' || gpsCurrentSpeed > 10)) {
     const d = haversine(gpsLastPos.lat, gpsLastPos.lng, pos.coords.latitude, pos.coords.longitude);
-    // ジャンプ検出(5km以上の急変化は除外)、微小誤差は除外
     if (d > 0.005 && d < 5) {
       gpsDistance += d;
       document.getElementById('gpsDistance').textContent = gpsDistance.toFixed(1);
       saveGpsDistance();
     }
   }
-
   gpsLastPos = { lat: pos.coords.latitude, lng: pos.coords.longitude, t: pos.timestamp };
-
-  // ルート履歴記録（30秒ごと、または50m以上移動した時）
   const now = Date.now();
   if (now - gpsLastRouteRecord > 30000) {
     appendRoutePoint(pos.coords.latitude, pos.coords.longitude, gpsCurrentSpeed);
@@ -2858,7 +2615,6 @@ function onGpsError(err) {
   }
   document.getElementById('gpsSpeed').textContent = '--';
 }
-
 function haversine(lat1, lng1, lat2, lng2) {
   const R = 6371;
   const toRad = x => x * Math.PI / 180;
@@ -2867,8 +2623,6 @@ function haversine(lat1, lng1, lat2, lng2) {
   const a = Math.sin(dLat/2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(a));
 }
-
-// Wake Lock (画面スリープ防止)
 async function requestWakeLock() {
   if ('wakeLock' in navigator) {
     try {
@@ -2883,14 +2637,11 @@ function releaseWakeLock() {
     wakeLock = null;
   }
 }
-// 画面が復帰したらWake Lock再取得
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && gpsEnabled && !wakeLock) {
     requestWakeLock();
   }
 });
-
-// ルート確認モーダル
 function openRouteModal() {
   const raw = localStorage.getItem(STORAGE.routeToday);
   const el = document.getElementById('routeContent');
@@ -2905,7 +2656,6 @@ function openRouteModal() {
     if (points.length === 0) {
       el.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:20px;">ルート記録なし</div>';
     } else {
-      // 最初と最後のポイントをGoogle Mapsリンクに
       const first = points[0];
       const last = points[points.length - 1];
       const maxSpeed = Math.max(...points.map(p => p.speed || 0));
@@ -2964,9 +2714,6 @@ function exportRouteCSV() {
     showAlert('エラー: ' + e.message, 'warn');
   }
 }
-// ============ GPS END ============
-
-// ============ 車両台帳 ============
 let vehicles = [];
 function loadVehicles() {
   const saved = localStorage.getItem(STORAGE.vehicles);
@@ -3007,7 +2754,6 @@ function addVehicle() {
 function deleteVehicle(id) {
   if (!confirm('この車両を削除しますか？')) return;
   vehicles = vehicles.filter(v => v.id !== id);
-  // ドライバーから参照も除去
   drivers.forEach(d => {
     if (d.assignedVehicleId === id) d.assignedVehicleId = null;
   });
@@ -3055,8 +2801,6 @@ function renderVehicleList() {
     </div>`;
   }).join('');
 }
-
-// ============ 代車切替 ============
 function getCurrentVehicleId(driverId) {
   const raw = localStorage.getItem(STORAGE.currentVehicle);
   if (!raw) return null;
@@ -3077,13 +2821,11 @@ function getActiveVehicle() {
   if (!currentDriverId) return null;
   const driver = drivers.find(d => d.id === currentDriverId);
   if (!driver) return null;
-  // 代車使用中を優先
   const tempId = getCurrentVehicleId(currentDriverId);
   if (tempId) {
     const v = vehicles.find(x => x.id === tempId);
     if (v) return { vehicle: v, isSubstitute: true };
   }
-  // 通常車両
   if (driver.assignedVehicleId) {
     const v = vehicles.find(x => x.id === driver.assignedVehicleId);
     if (v) return { vehicle: v, isSubstitute: false };
@@ -3130,7 +2872,6 @@ function closeVehicleSwitchModal() {
 function switchVehicle(vehicleId) {
   const driver = drivers.find(d => d.id === currentDriverId);
   if (driver && driver.assignedVehicleId === vehicleId) {
-    // 専用車両を選択 → 代車モード解除
     setCurrentVehicleId(currentDriverId, null);
   } else {
     setCurrentVehicleId(currentDriverId, vehicleId);
@@ -3145,8 +2886,6 @@ function restoreDefaultVehicle() {
   updateVehicleUI();
   showAlert('✓ 専用車両に戻しました', 'info');
 }
-
-// ============ 運行予定 ============
 function loadPlans() {
   const raw = localStorage.getItem(STORAGE.plans);
   return raw ? JSON.parse(raw) : {};
@@ -3243,17 +2982,11 @@ function updatePlanPanel() {
     </div>
   `).join('');
 }
-
-// ============ 設定モーダル ============
 function openSettingsModal() {
   document.getElementById('settingsModal').classList.add('show');
   updateGpsToggleUI();
 }
 function closeSettingsModal() { document.getElementById('settingsModal').classList.remove('show'); }
-
-// ============ 車両台帳 END ============
-
-// ============ LOG EDIT ============
 let editingLogIdx = null;
 function openEditLog(idx) {
   editingLogIdx = idx;
@@ -3264,7 +2997,6 @@ function openEditLog(idx) {
   document.getElementById('editTime').value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   document.getElementById('editRoad').value = l.road;
   document.getElementById('editLoad').value = l.load;
-  // 追加フィールド（給油・高速の場合）
   const extra = document.getElementById('editExtraFields');
   let extraHTML = '';
   if (l.fuelLiter !== undefined) {
@@ -3305,7 +3037,6 @@ function saveEditLog() {
     d.setHours(parseInt(h), parseInt(m), 0, 0);
     l.time = d.getTime();
   }
-  // 追加フィールド反映
   const fuelLiterEl = document.getElementById('editFuelLiter');
   if (fuelLiterEl) {
     const oldLiter = l.fuelLiter;
@@ -3313,14 +3044,12 @@ function saveEditLog() {
     l.fuelLiter = parseFloat(fuelLiterEl.value) || 0;
     l.fuelYen = parseInt(document.getElementById('editFuelYen').value) || 0;
     l.fuelOdo = parseInt(document.getElementById('editFuelOdo').value) || null;
-    // state.fuelsも同期
     const f = state.fuels.find(x => x.time === logs[editingLogIdx].time - 0);
     if (f) {
       f.liter = l.fuelLiter;
       f.yen = l.fuelYen;
       f.odo = l.fuelOdo;
     } else {
-      // 時刻変更された場合は古い値で探す
       const oldF = state.fuels.find(x => x.liter === oldLiter && x.yen === oldYen);
       if (oldF) {
         oldF.liter = l.fuelLiter;
@@ -3366,7 +3095,6 @@ function deleteLog() {
   if (editingLogIdx === null) return;
   if (!confirm('このログを削除しますか？')) return;
   const l = logs[editingLogIdx];
-  // 給油・高速も同期削除
   if (l.fuelLiter !== undefined) {
     state.fuels = state.fuels.filter(f => !(f.liter === l.fuelLiter && f.yen === l.fuelYen));
   }
@@ -3383,8 +3111,6 @@ function deleteLog() {
   closeEditLog();
   showAlert('✓ 削除しました', 'info');
 }
-
-// ============ DRIVER ============
 function openDriverModal() {
   updateVehicleAssignSelect();
   renderDriverList();
@@ -3451,25 +3177,18 @@ document.getElementById('driverSelect').addEventListener('change', (e) => {
   updatePlanPanel();
   checkVehicleExpiry();
 });
-
-// ============ ALERT ============
 function showAlert(msg, type = 'info') {
   const el = document.createElement('div');
   el.className = `alert ${type}`;
   el.textContent = msg;
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 3500);
-  // バイブレーション
   if (navigator.vibrate && (type === 'warn' || type === 'danger')) {
     navigator.vibrate([200, 100, 200]);
   }
 }
-
-// ============ EXPORT ============
-// ============ EXPORT / SEND ============
 let currentReportText = '';
 let currentReportCSV = '';
-
 function buildReport(simple = false) {
   const driver = drivers.find(d => d.id === currentDriverId);
   const filtered = logs.filter(l => l.driver === currentDriverId).slice().sort((a,b) => a.time - b.time);
@@ -3478,15 +3197,11 @@ function buildReport(simple = false) {
   const totalL = myFuels.reduce((s, f) => s + (parseFloat(f.liter) || 0), 0);
   const totalFY = myFuels.reduce((s, f) => s + (parseInt(f.yen) || 0), 0);
   const totalTY = myTolls.reduce((s, t) => s + (parseInt(t.yen) || 0), 0);
-
-  // 出庫・帰庫時刻
   const startLog = filtered.find(l => l.label === '出庫' || l.baseAction === '出庫');
   const endLog = filtered.slice().reverse().find(l => l.label === '帰庫' || l.baseAction === '帰庫');
   const startTime = startLog ? new Date(startLog.time) : null;
   const endTime = endLog ? new Date(endLog.time) : null;
   const dutyMs = (startTime && endTime) ? (endTime.getTime() - startTime.getTime()) : 0;
-
-  // 距離・燃費
   let distText = '-';
   let effText = '';
   if (state.odoStart && state.odoEnd) {
@@ -3496,9 +3211,7 @@ function buildReport(simple = false) {
       effText = ` (${(dist/totalL).toFixed(2)}km/L)`;
     }
   }
-
   if (simple) {
-    // ===== 簡易版 =====
     let txt = `【運転日報】${todayKey()}\n`;
     txt += `${driver.name}`;
     const active = getActiveVehicle();
@@ -3514,11 +3227,9 @@ function buildReport(simple = false) {
     if (startTime && endTime) {
       txt += `◆拘束: ${fmtTime(startTime)}-${fmtTime(endTime)} (${fmtDuration(dutyMs)})\n`;
     }
-    // 運行(主要イベントのみ)
     const mainLabels = ['出庫', '帰庫', '荷積', '荷降', '休憩'];
     const mainLogs = filtered.filter(l => {
       const base = l.baseAction || l.label;
-      // 主要イベント or 高速料金（区間情報あり）
       return mainLabels.includes(base) || l.tollYen;
     });
     if (mainLogs.length > 0) {
@@ -3528,7 +3239,6 @@ function buildReport(simple = false) {
         txt += `${fmtTime(t)} ${l.label}\n`;
       });
     }
-    // 給油明細
     if (myFuels.length > 0) {
       txt += `\n◆給油\n`;
       myFuels.forEach(f => {
@@ -3536,7 +3246,6 @@ function buildReport(simple = false) {
         txt += `${fmtTime(t)} ${f.liter}L${f.yen ? ' ¥' + f.yen.toLocaleString() : ''}\n`;
       });
     }
-    // 高速明細
     if (myTolls.length > 0) {
       txt += `\n◆高速\n`;
       myTolls.forEach(t => {
@@ -3546,12 +3255,9 @@ function buildReport(simple = false) {
     }
     return txt;
   }
-
-  // ===== 通常版(従来) =====
   let txt = `【運転日報】\n`;
   txt += `日付: ${todayKey()}\n`;
   txt += `氏名: ${driver.name}\n`;
-  // 車両情報（代車優先）
   const active = getActiveVehicle();
   if (active) {
     txt += `車両: ${active.vehicle.number}${active.vehicle.model ? ' (' + active.vehicle.model + ')' : ''}${active.isSubstitute ? ' ※代車' : ''}\n`;
@@ -3605,11 +3311,10 @@ function buildReport(simple = false) {
   txt += `出力: ${fmtTimeSec(new Date())}\n`;
   return txt;
 }
-
 function buildCSV() {
   const driver = drivers.find(d => d.id === currentDriverId);
   const filtered = logs.filter(l => l.driver === currentDriverId).slice().sort((a,b) => a.time - b.time);
-  let csv = '\ufeff'; // BOM（Excel対応）
+  let csv = '\ufeff';
   csv += `日付,${todayKey()}\n`;
   csv += `氏名,${driver.name}\n`;
   csv += `車両,${driver.vehicle || '-'}\n`;
@@ -3625,9 +3330,7 @@ function buildCSV() {
   });
   return csv;
 }
-
 let currentReportMode = 'full';
-
 function exportLog() {
   if (!currentDriverId) { showAlert('ドライバーを選択してください', 'info'); return; }
   const filtered = logs.filter(l => l.driver === currentDriverId);
@@ -3640,17 +3343,14 @@ function exportLog() {
   hint.textContent = driver.email ? `メール宛先: ${driver.email}` : 'メール宛先未登録(ドライバー設定で登録可)';
   document.getElementById('sendModal').classList.add('show');
 }
-
 function switchReportMode(mode) {
   currentReportMode = mode;
   updateReportPreview();
 }
-
 function updateReportPreview() {
   const isSimple = currentReportMode === 'simple';
   currentReportText = buildReport(isSimple);
   document.getElementById('reportPreview').textContent = currentReportText;
-  // ボタンのアクティブ状態切替
   const fullBtn = document.getElementById('reportModeFull');
   const simpleBtn = document.getElementById('reportModeSimple');
   if (isSimple) {
@@ -3661,11 +3361,9 @@ function updateReportPreview() {
     simpleBtn.classList.remove('primary');
   }
 }
-
 function closeSendModal() {
   document.getElementById('sendModal').classList.remove('show');
 }
-
 async function sendByShare() {
   if (!navigator.share) {
     showAlert('共有機能が使えません', 'info');
@@ -3683,7 +3381,6 @@ async function sendByShare() {
     }
   }
 }
-
 function sendByMail() {
   const driver = drivers.find(d => d.id === currentDriverId);
   const to = driver.email || '';
@@ -3693,7 +3390,6 @@ function sendByMail() {
   window.location.href = mailto;
   closeSendModal();
 }
-
 function downloadCSV() {
   const driver = drivers.find(d => d.id === currentDriverId);
   const filename = `日報_${todayKey()}_${driver.name}.csv`;
@@ -3707,7 +3403,6 @@ function downloadCSV() {
   closeSendModal();
   showAlert('✓ CSVをダウンロード', 'info');
 }
-
 function downloadTxt() {
   const driver = drivers.find(d => d.id === currentDriverId);
   const filename = `日報_${todayKey()}_${driver.name}.txt`;
@@ -3721,7 +3416,6 @@ function downloadTxt() {
   closeSendModal();
   showAlert('✓ テキスト保存', 'info');
 }
-
 function copyReport() {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(currentReportText).then(() => {
@@ -3739,7 +3433,6 @@ function copyReport() {
     closeSendModal();
   }
 }
-
 function closeExportModal() {
   document.getElementById('exportModal').classList.remove('show');
 }
@@ -3749,8 +3442,6 @@ function copyExport() {
   document.execCommand('copy');
   showAlert('✓ コピーしました', 'info');
 }
-
-// ============ HISTORY ============
 function openHistoryModal() {
   const saved = localStorage.getItem(STORAGE.history);
   const hist = saved ? JSON.parse(saved) : {};
@@ -3773,8 +3464,6 @@ function openHistoryModal() {
 function closeHistoryModal() {
   document.getElementById('historyModal').classList.remove('show');
 }
-
-// ============ RESET ============
 function resetToday() {
   if (!confirm('本日の記録をリセットしますか？')) return;
   if (logs.length > 0) archiveLogs(todayKey(), logs);
@@ -3787,7 +3476,6 @@ function resetToday() {
     alertedContDrive: false, alertedDuty: false,
     fuels: [], tolls: [], odoStart: null, odoEnd: null
   };
-  // GPS関連もリセット
   gpsDistance = 0;
   gpsLastPos = null;
   localStorage.removeItem(STORAGE.routeToday);
@@ -3802,10 +3490,7 @@ function resetToday() {
   renderLogs();
   showAlert('✓ リセット完了', 'info');
 }
-
-// ============ START ============
-init();
-</script>
+init();</script>
 
 </body>
 </html>
