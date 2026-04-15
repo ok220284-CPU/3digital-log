@@ -1479,11 +1479,16 @@ const DEFAULT_LOAD_SITES = ['住之江','堺','松原','枚方','西宮','港区
 const DEFAULT_UNLOAD_SITES = [
   '神戸市内',
   '大阪市内',
-  '北摂 (茨木・高槻・吹田)',
   '堺市内',
-  '南河内 (富田林・羽曳野・河内長野)',
-  '中河内 (八尾・東大阪・柏原)',
-  '泉州 (岸和田・貝塚・泉佐野)',
+  '茨木・高槻・吹田',
+  '豊中・池田・箕面',
+  '東大阪・八尾・柏原',
+  '富田林・羽曳野・河内長野',
+  '松原・藤井寺・大阪狭山',
+  '岸和田・泉大津・高石',
+  '和泉・貝塚・泉佐野',
+  '芦屋・西宮・尼崎',
+  '伊丹・宝塚・川西',
   '京都市内',
   '奈良',
   '和歌山'
@@ -1503,13 +1508,13 @@ function loadSitePresets() {
   if (unloadSites.length === 0) {
     unloadSites = DEFAULT_UNLOAD_SITES.map(name => ({ name, count: 0 }));
   } else {
-    const hasOldFormat = unloadSites.some(s =>
-      ['中河内','南河内','北摂','泉州','堺','京都'].includes(s.name)
-    );
+    const oldNames = ['中河内','南河内','北摂','泉州','堺','京都',
+      '中河内 (八尾・東大阪・柏原)','南河内 (富田林・羽曳野・河内長野)',
+      '北摂 (茨木・高槻・吹田)','泉州 (岸和田・貝塚・泉佐野)'];
+    const hasOldFormat = unloadSites.some(s => oldNames.includes(s.name));
     if (hasOldFormat) {
-      const customs = unloadSites.filter(s =>
-        !['中河内','南河内','北摂','泉州','堺','京都','神戸市内','大阪市内','奈良','和歌山'].includes(s.name)
-      );
+      const keepNames = [...oldNames, '神戸市内','大阪市内','堺市内','奈良','和歌山','京都市内'];
+      const customs = unloadSites.filter(s => !keepNames.includes(s.name));
       unloadSites = DEFAULT_UNLOAD_SITES.map(name => ({ name, count: 0 })).concat(customs);
       saveSitePresets();
     }
@@ -2266,28 +2271,43 @@ function exportBackup() {
 function importBackup(event) {
   const file = event.target.files[0];
   if (!file) return;
-  if (!confirm('現在のデータを上書きします。続行しますか？')) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay show';
+  overlay.style.zIndex = '300';
+  overlay.innerHTML = `<div class="modal" style="max-width:320px;text-align:center;">
+    <h3>▼ 復元確認</h3>
+    <div style="font-size:14px;color:var(--white);margin-bottom:16px;">現在のデータを上書きします。続行しますか？</div>
+    <div class="modal-btns">
+      <button class="modal-btn" id="impCancel">キャンセル</button>
+      <button class="modal-btn danger" id="impConfirm">復元する</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#impCancel').onclick = () => {
+    overlay.remove();
     event.target.value = '';
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const backup = JSON.parse(e.target.result);
-      if (!backup.data) throw new Error('不正なファイル');
-      Object.keys(STORAGE).forEach(key => localStorage.removeItem(STORAGE[key]));
-      Object.keys(backup.data).forEach(key => {
-        localStorage.setItem(key, backup.data[key]);
-      });
-      closeBackupModal();
-      showAlert('✓ 復元しました。画面を再読込します', 'info');
-      setTimeout(() => location.reload(), 1500);
-    } catch(err) {
-      showAlert('復元失敗: ' + err.message, 'warn');
-    }
   };
-  reader.readAsText(file);
-  event.target.value = '';
+  overlay.querySelector('#impConfirm').onclick = () => {
+    overlay.remove();
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const backup = JSON.parse(e.target.result);
+        if (!backup.data) throw new Error('不正なファイル');
+        Object.keys(STORAGE).forEach(key => localStorage.removeItem(STORAGE[key]));
+        Object.keys(backup.data).forEach(key => {
+          localStorage.setItem(key, backup.data[key]);
+        });
+        closeBackupModal();
+        showAlert('✓ 復元しました。画面を再読込します', 'info');
+        setTimeout(() => location.reload(), 1500);
+      } catch(err) {
+        showAlert('復元失敗: ' + err.message, 'warn');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  };
 }
 const NOTICES = [
   { cat: 'アルコール', icon: '🍺', text: '出庫前のアルコールチェックは必ず実施しましょう。数値は0.00が基本です。' },
@@ -2762,15 +2782,30 @@ function addVehicle() {
   updateVehicleUI();
 }
 function deleteVehicle(id) {
-  if (!confirm('この車両を削除しますか？')) return;
-  vehicles = vehicles.filter(v => v.id !== id);
-  drivers.forEach(d => {
-    if (d.assignedVehicleId === id) d.assignedVehicleId = null;
-  });
-  saveDrivers();
-  saveVehicles();
-  renderVehicleList();
-  updateVehicleUI();
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay show';
+  overlay.style.zIndex = '300';
+  overlay.innerHTML = `<div class="modal" style="max-width:320px;text-align:center;">
+    <h3>▼ 削除確認</h3>
+    <div style="font-size:14px;color:var(--white);margin-bottom:16px;">この車両を削除しますか？</div>
+    <div class="modal-btns">
+      <button class="modal-btn" id="vehDelCancel">キャンセル</button>
+      <button class="modal-btn danger" id="vehDelConfirm">削除</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#vehDelCancel').onclick = () => overlay.remove();
+  overlay.querySelector('#vehDelConfirm').onclick = () => {
+    overlay.remove();
+    vehicles = vehicles.filter(v => v.id !== id);
+    drivers.forEach(d => {
+      if (d.assignedVehicleId === id) d.assignedVehicleId = null;
+    });
+    saveDrivers();
+    saveVehicles();
+    renderVehicleList();
+    updateVehicleUI();
+  };
 }
 function daysUntil(dateStr) {
   if (!dateStr) return null;
@@ -3103,23 +3138,43 @@ function saveEditLog() {
 }
 function deleteLog() {
   if (editingLogIdx === null) return;
-  if (!confirm('このログを削除しますか？')) return;
-  const l = logs[editingLogIdx];
-  if (l.fuelLiter !== undefined) {
-    state.fuels = state.fuels.filter(f => !(f.liter === l.fuelLiter && f.yen === l.fuelYen));
-  }
-  if (l.tollYen !== undefined) {
-    state.tolls = state.tolls.filter(t => !(t.yen === l.tollYen && t.from === l.tollFrom));
-  }
-  if (l.label === '出庫') state.odoStart = null;
-  if (l.label === '帰庫') state.odoEnd = null;
-  logs.splice(editingLogIdx, 1);
-  saveLogs();
-  saveState();
-  updateSummaryUI();
-  renderLogs();
+  const idx = editingLogIdx;
   closeEditLog();
-  showAlert('✓ 削除しました', 'info');
+  showDeleteConfirm(idx);
+}
+
+function showDeleteConfirm(idx) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay show';
+  overlay.innerHTML = `<div class="modal" style="max-width:320px;text-align:center;">
+    <h3>▼ 削除確認</h3>
+    <div style="font-size:14px;color:var(--white);margin-bottom:16px;">このログを削除しますか？</div>
+    <div class="modal-btns">
+      <button class="modal-btn" id="delCancel">キャンセル</button>
+      <button class="modal-btn danger" id="delConfirm">削除する</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#delCancel').onclick = () => overlay.remove();
+  overlay.querySelector('#delConfirm').onclick = () => {
+    const l = logs[idx];
+    if (l.fuelLiter !== undefined) {
+      state.fuels = state.fuels.filter(f => !(f.liter === l.fuelLiter && f.yen === l.fuelYen));
+    }
+    if (l.tollYen !== undefined) {
+      state.tolls = state.tolls.filter(t => !(t.yen === l.tollYen && t.from === l.tollFrom));
+    }
+    const base = l.baseAction || l.label;
+    if (base === '出庫') state.odoStart = null;
+    if (base === '帰庫') state.odoEnd = null;
+    logs.splice(idx, 1);
+    saveLogs();
+    saveState();
+    updateSummaryUI();
+    renderLogs();
+    overlay.remove();
+    showAlert('✓ 削除しました', 'info');
+  };
 }
 function openDriverModal() {
   updateVehicleAssignSelect();
@@ -3151,11 +3206,26 @@ function updateVehicleAssignSelect() {
     vehicles.map(v => `<option value="${v.id}">${v.number}${v.model ? ' - ' + v.model : ''}</option>`).join('');
 }
 function deleteDriver(id) {
-  if (!confirm('このドライバーを削除しますか？')) return;
-  drivers = drivers.filter(d => d.id !== id);
-  saveDrivers();
-  renderDrivers();
-  renderDriverList();
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay show';
+  overlay.style.zIndex = '300';
+  overlay.innerHTML = `<div class="modal" style="max-width:320px;text-align:center;">
+    <h3>▼ 削除確認</h3>
+    <div style="font-size:14px;color:var(--white);margin-bottom:16px;">このドライバーを削除しますか？</div>
+    <div class="modal-btns">
+      <button class="modal-btn" id="drvDelCancel">キャンセル</button>
+      <button class="modal-btn danger" id="drvDelConfirm">削除</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#drvDelCancel').onclick = () => overlay.remove();
+  overlay.querySelector('#drvDelConfirm').onclick = () => {
+    overlay.remove();
+    drivers = drivers.filter(d => d.id !== id);
+    saveDrivers();
+    renderDrivers();
+    renderDriverList();
+  };
 }
 function renderDrivers() {
   const sel = document.getElementById('driverSelect');
@@ -3247,20 +3317,6 @@ function buildReport(simple = false) {
       mainLogs.forEach(l => {
         const t = new Date(l.time);
         txt += `${fmtTime(t)} ${l.label}\n`;
-      });
-    }
-    if (myFuels.length > 0) {
-      txt += `\n◆給油\n`;
-      myFuels.forEach(f => {
-        const t = new Date(f.time);
-        txt += `${fmtTime(t)} ${f.liter}L${f.yen ? ' ¥' + f.yen.toLocaleString() : ''}\n`;
-      });
-    }
-    if (myTolls.length > 0) {
-      txt += `\n◆高速\n`;
-      myTolls.forEach(t => {
-        const time = new Date(t.time);
-        txt += `${fmtTime(time)} ${t.from||'?'}→${t.to||'?'} ¥${t.yen.toLocaleString()}\n`;
       });
     }
     return txt;
@@ -3475,30 +3531,44 @@ function closeHistoryModal() {
   document.getElementById('historyModal').classList.remove('show');
 }
 function resetToday() {
-  if (!confirm('本日の記録をリセットしますか？')) return;
-  if (logs.length > 0) archiveLogs(todayKey(), logs);
-  logs = [];
-  state = {
-    status: 'idle', statusLabel: '待機中', statusStart: null,
-    road: '一般道', load: '空車',
-    dutyStart: null, contDriveStart: null, contDriveAccum: 0,
-    totalRest: 0,
-    alertedContDrive: false, alertedDuty: false,
-    fuels: [], tolls: [], odoStart: null, odoEnd: null
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay show';
+  overlay.innerHTML = `<div class="modal" style="max-width:320px;text-align:center;">
+    <h3>▼ リセット確認</h3>
+    <div style="font-size:14px;color:var(--white);margin-bottom:16px;">本日の記録をリセットしますか？</div>
+    <div class="modal-btns">
+      <button class="modal-btn" id="resetCancel">キャンセル</button>
+      <button class="modal-btn danger" id="resetConfirm">リセット</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#resetCancel').onclick = () => overlay.remove();
+  overlay.querySelector('#resetConfirm').onclick = () => {
+    overlay.remove();
+    if (logs.length > 0) archiveLogs(todayKey(), logs);
+    logs = [];
+    state = {
+      status: 'idle', statusLabel: '待機中', statusStart: null,
+      road: '一般道', load: '空車',
+      dutyStart: null, contDriveStart: null, contDriveAccum: 0,
+      totalRest: 0,
+      alertedContDrive: false, alertedDuty: false,
+      fuels: [], tolls: [], odoStart: null, odoEnd: null
+    };
+    gpsDistance = 0;
+    gpsLastPos = null;
+    localStorage.removeItem(STORAGE.routeToday);
+    if (document.getElementById('gpsDistance')) {
+      document.getElementById('gpsDistance').textContent = '0.0';
+    }
+    saveLogs();
+    saveState();
+    updateStatusUI();
+    updateSummaryUI();
+    updateToggleUI();
+    renderLogs();
+    showAlert('✓ リセット完了', 'info');
   };
-  gpsDistance = 0;
-  gpsLastPos = null;
-  localStorage.removeItem(STORAGE.routeToday);
-  if (document.getElementById('gpsDistance')) {
-    document.getElementById('gpsDistance').textContent = '0.0';
-  }
-  saveLogs();
-  saveState();
-  updateStatusUI();
-  updateSummaryUI();
-  updateToggleUI();
-  renderLogs();
-  showAlert('✓ リセット完了', 'info');
 }
 init();</script>
 
