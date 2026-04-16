@@ -1399,16 +1399,12 @@ function logEvent(label, newStatus, extra = {}) {
 function confirmUnload(stillLoaded) {
   document.getElementById('unloadConfirmModal').classList.remove('show');
   if (!stillLoaded) {
+    // 荷降イベント自身は実車のまま。次のイベントから空車になるようstateだけ変更
     state.load = '空車';
     updateToggleUI();
     saveState();
-    if (logs.length > 0) {
-      logs[logs.length - 1].load = '空車';
-      saveLogs();
-      renderLogs();
-    }
     speak('空車です');
-    showAlert('自動: 空車に切替', 'info');
+    showAlert('自動: 次のイベントから空車', 'info');
   }
 }
 function updateStatusUI() {
