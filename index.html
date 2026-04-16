@@ -1006,7 +1006,15 @@ body {
       <button class="modal-btn primary" id="reportModeFull" onclick="switchReportMode('full')">通常版 (詳細)</button>
       <button class="modal-btn" id="reportModeSimple" onclick="switchReportMode('simple')">簡易版 (LINE向き)</button>
     </div>
-    <div id="reportPreview" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;font-family:var(--mono);font-size:10px;color:var(--text);max-height:180px;overflow-y:auto;white-space:pre-wrap;margin-bottom:12px;line-height:1.5;"></div>
+    <div id="reportPreview" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;font-family:var(--mono);font-size:10px;color:var(--text);max-height:180px;overflow-y:auto;white-space:pre-wrap;margin-bottom:8px;line-height:1.5;"></div>
+    <div id="manualDistanceBlock" style="display:none;margin-bottom:12px;padding:8px;background:var(--panel-2);border:1px solid var(--border);border-radius:6px;">
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">📏 走行距離 (odo未入力時の手動補完)</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="number" id="manualDistanceInput" placeholder="例: 150" inputmode="numeric" style="flex:1;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:14px;" oninput="onManualDistanceChange()">
+        <span style="font-size:12px;color:var(--text-dim);">km</span>
+        <button class="modal-btn" style="padding:6px 10px;font-size:11px;" onclick="clearManualDistance()">クリア</button>
+      </div>
+    </div>
     <div style="display:flex;flex-direction:column;gap:8px;">
       <button class="modal-btn primary" onclick="sendByShare()">📱 共有シート(LINE/メール他)</button>
       <button class="modal-btn primary" onclick="sendByMail()">📧 メール送信</button>
@@ -1069,7 +1077,8 @@ let state = {
   fuels: [],
   tolls: [],
   odoStart: null,
-  odoEnd: null
+  odoEnd: null,
+  manualDistance: null
 };
 let logs = [];
 let drivers = [];
@@ -1414,6 +1423,8 @@ function updateSummaryUI() {
   let odoText = '--';
   if (state.odoStart && state.odoEnd) {
     odoText = (state.odoEnd - state.odoStart).toString();
+  } else if (state.manualDistance && state.manualDistance > 0) {
+    odoText = state.manualDistance + '※';
   } else if (state.odoStart) {
     odoText = state.odoStart + '→';
   }
@@ -3284,11 +3295,16 @@ function buildReport(simple = false) {
   const dutyMs = (startTime && endTime) ? (endTime.getTime() - startTime.getTime()) : 0;
   let distText = '-';
   let effText = '';
+  let distVal = null;
   if (state.odoStart && state.odoEnd) {
-    const dist = state.odoEnd - state.odoStart;
-    distText = `${dist}km`;
+    distVal = state.odoEnd - state.odoStart;
+  } else if (state.manualDistance && state.manualDistance > 0) {
+    distVal = state.manualDistance;
+  }
+  if (distVal !== null) {
+    distText = `${distVal}km`;
     if (totalL > 0) {
-      effText = ` (${(dist/totalL).toFixed(2)}km/L)`;
+      effText = ` (${(distVal/totalL).toFixed(2)}km/L)`;
     }
   }
   if (simple) {
@@ -3335,6 +3351,12 @@ function buildReport(simple = false) {
     txt += `走行距離: ${dist} km (${state.odoStart}→${state.odoEnd})\n`;
     if (totalL > 0) {
       const eff = (dist / totalL).toFixed(2);
+      txt += `燃費: ${eff} km/L\n`;
+    }
+  } else if (state.manualDistance && state.manualDistance > 0) {
+    txt += `走行距離: ${state.manualDistance} km (手動入力)\n`;
+    if (totalL > 0) {
+      const eff = (state.manualDistance / totalL).toFixed(2);
       txt += `燃費: ${eff} km/L\n`;
     }
   } else if (state.odoStart) {
@@ -3407,11 +3429,35 @@ function exportLog() {
   const driver = drivers.find(d => d.id === currentDriverId);
   const hint = document.getElementById('sendHint');
   hint.textContent = driver.email ? `メール宛先: ${driver.email}` : 'メール宛先未登録(ドライバー設定で登録可)';
+  updateManualDistanceUI();
   document.getElementById('sendModal').classList.add('show');
 }
 function switchReportMode(mode) {
   currentReportMode = mode;
   updateReportPreview();
+}
+function onManualDistanceChange() {
+  const val = parseInt(document.getElementById('manualDistanceInput').value);
+  state.manualDistance = (val && val > 0) ? val : null;
+  saveState();
+  updateReportPreview();
+  updateSummaryUI();
+}
+function clearManualDistance() {
+  document.getElementById('manualDistanceInput').value = '';
+  state.manualDistance = null;
+  saveState();
+  updateReportPreview();
+  updateSummaryUI();
+}
+function updateManualDistanceUI() {
+  const block = document.getElementById('manualDistanceBlock');
+  const input = document.getElementById('manualDistanceInput');
+  if (!block || !input) return;
+  // odoStart/odoEnd両方あるなら非表示、それ以外は表示
+  const hasBothOdo = state.odoStart && state.odoEnd;
+  block.style.display = hasBothOdo ? 'none' : 'block';
+  input.value = state.manualDistance || '';
 }
 function updateReportPreview() {
   const isSimple = currentReportMode === 'simple';
