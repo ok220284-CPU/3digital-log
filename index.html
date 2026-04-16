@@ -1078,7 +1078,8 @@ let state = {
   tolls: [],
   odoStart: null,
   odoEnd: null,
-  manualDistance: null
+  manualDistance: null,
+  pendingLoadChange: null
 };
 let logs = [];
 let drivers = [];
@@ -1353,11 +1354,18 @@ function logEvent(label, newStatus, extra = {}) {
     state.dutyStart = null;
     state.contDriveStart = null;
     state.contDriveAccum = 0;
+    state.pendingLoadChange = null;
   }
   let autoLoadChanged = null;
+  // 荷積: 即時切替せず、次の運転開始時に反映するようpendingにセット
   if (baseAction === '荷積' && state.load === '空車') {
-    state.load = '実車';
-    autoLoadChanged = '実車';
+    state.pendingLoadChange = '実車';
+  }
+  // 運転開始(drive)時、pendingLoadChangeがあれば今このイベントから実車として記録
+  if (newStatus === 'drive' && state.pendingLoadChange) {
+    state.load = state.pendingLoadChange;
+    autoLoadChanged = state.pendingLoadChange;
+    state.pendingLoadChange = null;
   }
   const entry = {
     time: now,
