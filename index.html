@@ -513,6 +513,64 @@ body {
   <div id="noticeText" style="font-size:12px;color:var(--white);line-height:1.5;">準備中...</div>
 </div>
 
+<div class="section-title">▼ 操作パネル</div>
+<div class="actions">
+  <button class="action-btn start" onclick="openOdoModal('出庫')"><span class="ico">▶</span>出庫</button>
+  <button class="action-btn" onclick="openTenkoModal()">📋 点呼</button>
+  <button class="action-btn" onclick="openSiteModal('load')">📦 荷積</button>
+  <button class="action-btn" onclick="openSiteModal('unload')">📥 荷降</button>
+  <button class="action-btn rest" onclick="logEvent('休憩', 'rest')"><span class="ico">☕</span>休憩</button>
+  <button class="action-btn drive" onclick="logEvent('運転開始', 'drive')"><span class="ico">🚛</span>運転開始</button>
+  <button class="action-btn" onclick="logEvent('待機', 'idle')">⏸ 待機</button>
+  <button class="action-btn" onclick="openTollModal()">🛣 高速</button>
+  <button class="action-btn" onclick="openFuelModal()">⛽ 給油</button>
+  <button class="action-btn" onclick="logEvent('洗車', 'work')">💧 洗車</button>
+  <button class="action-btn end" onclick="openOdoModal('帰庫')"><span class="ico">■</span>帰庫</button>
+  <button class="action-btn" onclick="logEvent('点検', 'work')">🔧 点検</button>
+</div>
+
+<div class="toggles">
+  <div class="toggle">
+    <div class="toggle-label">道路種別</div>
+    <div class="toggle-options">
+      <div class="toggle-opt active" data-toggle="road" data-val="一般道">一般道</div>
+      <div class="toggle-opt" data-toggle="road" data-val="高速道">高速道</div>
+    </div>
+  </div>
+  <div class="toggle">
+    <div class="toggle-label">積載状態</div>
+    <div class="toggle-options">
+      <div class="toggle-opt active" data-toggle="load" data-val="空車">空車</div>
+      <div class="toggle-opt" data-toggle="load" data-val="実車">実車</div>
+    </div>
+  </div>
+</div>
+
+<div class="status-panel">
+  <div class="status-label">▼ 現在のステータス</div>
+  <div class="status-value idle" id="statusValue">待機中</div>
+  <div class="status-time" id="statusTime">--:--経過</div>
+</div>
+
+<div class="duty-bar">
+  <div class="duty-row">
+    <span class="duty-label">連続運転</span>
+    <span class="duty-val" id="contDrive">00:00 / 04:00</span>
+  </div>
+  <div class="duty-row">
+    <span class="duty-label">拘束時間</span>
+    <span class="duty-val" id="dutyTime">00:00 / 13:00</span>
+  </div>
+  <div class="duty-row">
+    <span class="duty-label">総休憩</span>
+    <span class="duty-val" id="restTime">00:00</span>
+  </div>
+  <div class="duty-row">
+    <span class="duty-label">前回からのインターバル</span>
+    <span class="duty-val" id="intervalVal">--:--</span>
+  </div>
+</div>
+
 <div class="driver-bar">
   <select class="driver-select" id="driverSelect">
     <option value="">ドライバー選択...</option>
@@ -527,33 +585,6 @@ body {
     <span id="substituteLabel" style="display:none;font-size:12px;color:#000;background:#ffd54f;padding:2px 6px;border-radius:3px;font-weight:700;">代車</span>
   </div>
   <button onclick="openVehicleSwitchModal()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:4px 10px;border-radius:4px;font-size:10px;font-family:inherit;cursor:pointer;">切替</button>
-</div>
-
-<div class="status-panel">
-  <div class="status-label">▼ 現在のステータス</div>
-  <div class="status-value idle" id="statusValue">待機中</div>
-  <div class="status-time" id="statusTime">--:--経過</div>
-</div>
-
-<div id="gpsPanel" style="display:none;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:14px;">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-    <div style="display:flex;align-items:center;gap:6px;">
-      <span id="gpsIndicator" style="width:8px;height:8px;border-radius:50%;background:var(--text-dim);"></span>
-      <span style="font-family:var(--mono);font-size:12px;color:var(--text-dim);letter-spacing:1px;">GPS (補助)</span>
-    </div>
-    <button onclick="openRouteModal()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:3px 8px;border-radius:4px;font-size:12px;font-family:inherit;cursor:pointer;">ルート確認</button>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-    <div style="text-align:center;">
-      <div style="font-family:var(--mono);font-size:12px;color:var(--text-dim);">速度</div>
-      <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--white);"><span id="gpsSpeed">--</span><span style="font-size:11px;color:var(--text-dim);margin-left:2px;">km/h</span></div>
-    </div>
-    <div style="text-align:center;">
-      <div style="font-family:var(--mono);font-size:12px;color:var(--text-dim);">走行距離</div>
-      <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--white);"><span id="gpsDistance">0.0</span><span style="font-size:11px;color:var(--text-dim);margin-left:2px;">km</span></div>
-    </div>
-  </div>
-  <div style="font-size:11px;color:var(--text-dim);text-align:center;margin-top:6px;font-style:italic;">※ タコグラフではなく補助計測です</div>
 </div>
 
 <div class="summary">
@@ -582,59 +613,28 @@ body {
   <div id="planList"></div>
 </div>
 
-<div class="duty-bar">
-  <div class="duty-row">
-    <span class="duty-label">連続運転</span>
-    <span class="duty-val" id="contDrive">00:00 / 04:00</span>
+<div id="gpsPanel" style="display:none;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:14px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span id="gpsIndicator" style="width:8px;height:8px;border-radius:50%;background:var(--text-dim);"></span>
+      <span style="font-family:var(--mono);font-size:12px;color:var(--text-dim);letter-spacing:1px;">GPS (補助)</span>
+    </div>
+    <button onclick="openRouteModal()" style="background:none;border:1px solid var(--border);color:var(--text-dim);padding:3px 8px;border-radius:4px;font-size:12px;font-family:inherit;cursor:pointer;">ルート確認</button>
   </div>
-  <div class="duty-row">
-    <span class="duty-label">拘束時間</span>
-    <span class="duty-val" id="dutyTime">00:00 / 13:00</span>
-  </div>
-  <div class="duty-row">
-    <span class="duty-label">総休憩</span>
-    <span class="duty-val" id="restTime">00:00</span>
-  </div>
-  <div class="duty-row">
-    <span class="duty-label">前回からのインターバル</span>
-    <span class="duty-val" id="intervalVal">--:--</span>
-  </div>
-</div>
-
-<div class="toggles">
-  <div class="toggle">
-    <div class="toggle-label">道路種別</div>
-    <div class="toggle-options">
-      <div class="toggle-opt active" data-toggle="road" data-val="一般道">一般道</div>
-      <div class="toggle-opt" data-toggle="road" data-val="高速道">高速道</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+    <div style="text-align:center;">
+      <div style="font-family:var(--mono);font-size:12px;color:var(--text-dim);">速度</div>
+      <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--white);"><span id="gpsSpeed">--</span><span style="font-size:11px;color:var(--text-dim);margin-left:2px;">km/h</span></div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-family:var(--mono);font-size:12px;color:var(--text-dim);">走行距離</div>
+      <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--white);"><span id="gpsDistance">0.0</span><span style="font-size:11px;color:var(--text-dim);margin-left:2px;">km</span></div>
     </div>
   </div>
-  <div class="toggle">
-    <div class="toggle-label">積載状態</div>
-    <div class="toggle-options">
-      <div class="toggle-opt active" data-toggle="load" data-val="空車">空車</div>
-      <div class="toggle-opt" data-toggle="load" data-val="実車">実車</div>
-    </div>
-  </div>
+  <div style="font-size:11px;color:var(--text-dim);text-align:center;margin-top:6px;font-style:italic;">※ タコグラフではなく補助計測です</div>
 </div>
 
-<div class="section-title">▼ 操作パネル</div>
-<div class="actions">
-  <button class="action-btn start" onclick="openOdoModal('出庫')"><span class="ico">▶</span>出庫</button>
-  <button class="action-btn" onclick="openTenkoModal()">📋 点呼</button>
-  <button class="action-btn" onclick="openSiteModal('load')">📦 荷積</button>
-  <button class="action-btn" onclick="openSiteModal('unload')">📥 荷降</button>
-  <button class="action-btn rest" onclick="logEvent('休憩', 'rest')"><span class="ico">☕</span>休憩</button>
-  <button class="action-btn drive" onclick="logEvent('運転開始', 'drive')"><span class="ico">🚛</span>運転開始</button>
-  <button class="action-btn" onclick="logEvent('待機', 'idle')">⏸ 待機</button>
-  <button class="action-btn" onclick="openTollModal()">🛣 高速</button>
-  <button class="action-btn" onclick="openFuelModal()">⛽ 給油</button>
-  <button class="action-btn" onclick="logEvent('洗車', 'work')">💧 洗車</button>
-  <button class="action-btn end" onclick="openOdoModal('帰庫')"><span class="ico">■</span>帰庫</button>
-  <button class="action-btn" onclick="logEvent('点検', 'work')">🔧 点検</button>
-</div>
-
-<div class="log-panel">
+<div class="log-panel" id="logPanelSection" style="display:none;">
   <div class="log-header">
     <div class="log-title">▼ TODAY'S LOG</div>
     <div class="log-count" id="logCount">0 件</div>
@@ -652,6 +652,7 @@ body {
   <button class="footer-btn" onclick="openHistoryModal()">📅 履歴</button>
   <button class="footer-btn" onclick="openSettingsModal()">⚙ 設定</button>
   <button class="footer-btn" onclick="toggleAdminMode()" id="adminToggleBtn">👁 管理者モード</button>
+  <button class="footer-btn" onclick="toggleLogPanel()" id="logToggleBtn">📋 ログ</button>
 </div>
 
 <!-- 設定モーダル -->
@@ -1189,6 +1190,20 @@ function fbRefreshAdmin() {
     renderAdminPanel(snap.val() || {});
     showAlert('✓ 最新データに更新', 'info');
   });
+}
+function toggleLogPanel() {
+  const panel = document.getElementById('logPanelSection');
+  const btn = document.getElementById('logToggleBtn');
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+    btn.style.background = 'var(--accent)';
+    btn.textContent = '📋 ログを閉じる';
+    panel.scrollIntoView({ behavior: 'smooth' });
+  } else {
+    panel.style.display = 'none';
+    btn.style.background = '';
+    btn.textContent = '📋 ログ';
+  }
 }
 function toggleAdminMode() {
   fbAdminMode = !fbAdminMode;
