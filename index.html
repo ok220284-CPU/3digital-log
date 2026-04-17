@@ -1184,6 +1184,52 @@ function fbRefreshAdmin() {
     showAlert('✓ 最新データに更新', 'info');
   });
 }
+function checkGpsPermission() {
+  // 既に許可済み or スキップ済みなら表示しない
+  if (localStorage.getItem('dt_gps_asked')) return;
+  if (!navigator.geolocation) return;
+  // permissionsAPIで状態を確認（対応ブラウザのみ）
+  if (navigator.permissions && navigator.permissions.query) {
+    navigator.permissions.query({ name: 'geolocation' }).then(result => {
+      if (result.state === 'granted') {
+        localStorage.setItem('dt_gps_asked', '1');
+      } else if (result.state === 'prompt') {
+        // まだ聞かれてない → モーダル表示
+        setTimeout(() => {
+          document.getElementById('gpsPermissionModal').classList.add('show');
+        }, 1500);
+      }
+    }).catch(() => {
+      // permissions API非対応 → モーダル表示
+      setTimeout(() => {
+        document.getElementById('gpsPermissionModal').classList.add('show');
+      }, 1500);
+    });
+  } else {
+    // Safari等 permissions API非対応
+    setTimeout(() => {
+      document.getElementById('gpsPermissionModal').classList.add('show');
+    }, 1500);
+  }
+}
+function requestGpsPermission() {
+  document.getElementById('gpsPermissionModal').classList.remove('show');
+  navigator.geolocation.getCurrentPosition(
+    () => {
+      localStorage.setItem('dt_gps_asked', '1');
+      showAlert('✓ 位置情報を許可しました', 'info');
+    },
+    () => {
+      localStorage.setItem('dt_gps_asked', '1');
+      showAlert('位置情報が許可されませんでした。iPhoneの設定から変更できます', 'warn');
+    },
+    { timeout: 10000 }
+  );
+}
+function skipGpsPermission() {
+  document.getElementById('gpsPermissionModal').classList.remove('show');
+  localStorage.setItem('dt_gps_asked', '1');
+}
 function toggleAdminMode() {
   fbAdminMode = !fbAdminMode;
   const panel = document.getElementById('adminPanel');
@@ -1269,6 +1315,7 @@ function init() {
     setTimeout(() => showAlert(`▶ 運行継続中 (${h}時間経過)`, 'info'), 800);
   }
   setTimeout(checkVehicleExpiry, 1500);
+  checkGpsPermission();
 }
 function checkVehicleExpiry() {
   if (!currentDriverId) return;
@@ -3785,5 +3832,22 @@ function resetToday() {
 }
 init();</script>
 
+
+<!-- GPS許可モーダル -->
+<div class="modal-overlay" id="gpsPermissionModal">
+  <div class="modal">
+    <div style="text-align:center;font-size:40px;margin-bottom:12px;">📍</div>
+    <h3 style="text-align:center;margin-bottom:12px;">位置情報の使用について</h3>
+    <div style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:16px;">
+      デジログでは、<strong>事故やトラブル発生時の迅速な対応</strong>のため、運行中の位置情報を記録しています。<br><br>
+      ドライブレコーダーと併せて、ドライバーの安全を守るために活用します。<br><br>
+      次の画面で「許可」をタップしてください。
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button class="modal-btn primary" onclick="requestGpsPermission()" style="padding:12px;font-size:14px;">📍 位置情報を許可する</button>
+      <button class="modal-btn" onclick="skipGpsPermission()" style="font-size:12px;">あとで設定する</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
