@@ -1103,7 +1103,23 @@ function fbSyncCurrentState() {
   if (state.odoStart) data.odoStart = state.odoStart;
   if (state.odoEnd) data.odoEnd = state.odoEnd;
   if (state.manualDistance) data.manualDistance = state.manualDistance;
-  ref.set(data).catch(err => console.warn('Firebase sync error:', err));
+  // GPS位置情報を取得して追加
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      data.location = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        accuracy: Math.round(pos.coords.accuracy),
+        time: Date.now()
+      };
+      ref.set(data).catch(err => console.warn('Firebase sync error:', err));
+    }, () => {
+      // GPS取得失敗時もデータは同期
+      ref.set(data).catch(err => console.warn('Firebase sync error:', err));
+    }, { timeout: 5000, maximumAge: 30000 });
+  } else {
+    ref.set(data).catch(err => console.warn('Firebase sync error:', err));
+  }
 }
 
 let fbAdminListener = null;
@@ -1126,7 +1142,10 @@ function renderAdminPanel(allDrivers) {
     panel.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:20px;">まだデータがありません</div>';
     return;
   }
-  let html = '';
+  let html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+  html += '<span style="font-size:12px;font-weight:700;color:var(--text);">👁 全ドライバー状況</span>';
+  html += '<button onclick="fbRefreshAdmin()" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;">🔄 最新に更新</button>';
+  html += '</div>';
   Object.entries(allDrivers).sort((a,b) => (b[1].lastUpdate||0) - (a[1].lastUpdate||0)).forEach(([id, d]) => {
     const ago = d.lastUpdate ? Math.floor((Date.now() - d.lastUpdate) / 60000) : -1;
     const agoText = ago < 0 ? '' : ago < 1 ? '(たった今)' : '(' + ago + '分前)';
@@ -1148,9 +1167,22 @@ function renderAdminPanel(allDrivers) {
     html += '<span style="background:var(--panel);padding:2px 8px;border-radius:10px;">走行:' + dist + '</span></div>';
     html += '<div style="font-size:11px;color:var(--text-dim);margin-top:4px;">最終: ' + lt + ' ' + ll + '</div>';
     if (d.vehicle) html += '<div style="font-size:10px;color:var(--text-dim);margin-top:2px;">🚛 ' + d.vehicle + '</div>';
+    if (d.location && d.location.lat) {
+      const locAgo = Math.floor((Date.now() - (d.location.time || 0)) / 60000);
+      const locAgoText = locAgo < 1 ? 'たった今' : locAgo + '分前';
+      html += '<div style="font-size:10px;margin-top:4px;">';
+      html += '<a href="https://www.google.com/maps?q=' + d.location.lat + ',' + d.location.lng + '" target="_blank" style="color:#4FC3F7;text-decoration:none;">📍 位置を確認 (' + locAgoText + ')</a>';
+      html += '</div>';
+    }
     html += '</div>';
   });
   panel.innerHTML = html;
+}
+function fbRefreshAdmin() {
+  fbDb.ref('drivers').once('value', snap => {
+    renderAdminPanel(snap.val() || {});
+    showAlert('✓ 最新データに更新', 'info');
+  });
 }
 function toggleAdminMode() {
   fbAdminMode = !fbAdminMode;
