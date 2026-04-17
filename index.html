@@ -550,6 +550,12 @@ body {
   <div class="status-label">▼ 現在のステータス</div>
   <div class="status-value idle" id="statusValue">待機中</div>
   <div class="status-time" id="statusTime">--:--経過</div>
+  <div id="statusGpsInfo" style="display:none;margin-top:8px;padding:8px;background:var(--panel-2);border-radius:6px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span id="statusSpeed" style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--accent);">0 km/h</span>
+      <span id="statusLocation" style="font-size:11px;color:var(--text-dim);max-width:60%;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">📍 取得中...</span>
+    </div>
+  </div>
 </div>
 
 <div class="duty-bar">
@@ -1600,6 +1606,11 @@ function updateStatusUI() {
   el.className = 'status-value';
   if (state.status === 'idle') el.classList.add('idle');
   if (state.status === 'rest') el.classList.add('rest');
+  // GPS情報は運転中のみ表示
+  const gpsInfo = document.getElementById('statusGpsInfo');
+  if (gpsInfo) {
+    gpsInfo.style.display = (state.status === 'drive' && gpsEnabled) ? 'block' : 'none';
+  }
 }
 function updateSummaryUI() {
   const myFuels = state.fuels.filter(f => f.driver === currentDriverId);
@@ -2868,6 +2879,21 @@ function stopGps() {
   document.getElementById('gpsPanel').style.display = 'none';
   releaseWakeLock();
 }
+let lastLocationText = '';
+function updateStatusLocation(lat, lng) {
+  const url = 'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lng + '&localityLanguage=ja';
+  fetch(url).then(r => r.json()).then(data => {
+    let city = data.city || '';
+    let ward = data.locality || '';
+    let loc = city;
+    if (ward && ward !== city) loc += ward;
+    if (loc) {
+      lastLocationText = loc;
+      const el = document.getElementById('statusLocation');
+      if (el) el.textContent = '📍 ' + loc;
+    }
+  }).catch(() => {});
+}
 function onGpsSuccess(pos) {
   const ind = document.getElementById('gpsIndicator');
   if (ind) {
@@ -2885,6 +2911,9 @@ function onGpsSuccess(pos) {
     }
   }
   document.getElementById('gpsSpeed').textContent = gpsCurrentSpeed.toFixed(0);
+  // ステータスにも速度を表示
+  const speedEl = document.getElementById('statusSpeed');
+  if (speedEl) speedEl.textContent = Math.round(gpsCurrentSpeed) + ' km/h';
   if (gpsLastPos && (state.status === 'drive' || gpsCurrentSpeed > 10)) {
     const d = haversine(gpsLastPos.lat, gpsLastPos.lng, pos.coords.latitude, pos.coords.longitude);
     if (d > 0.005 && d < 5) {
@@ -2898,6 +2927,8 @@ function onGpsSuccess(pos) {
   if (now - gpsLastRouteRecord > 30000) {
     appendRoutePoint(pos.coords.latitude, pos.coords.longitude, gpsCurrentSpeed);
     gpsLastRouteRecord = now;
+    // 現在地名を30秒ごとに更新
+    updateStatusLocation(pos.coords.latitude, pos.coords.longitude);
   }
   // 高速道/一般道の自動判定（速度ベース）
   if (state.status === 'drive' && !autoRoadManualOverride) {
