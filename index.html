@@ -924,6 +924,9 @@ body {
     <div class="chip-label">タップで選択 / 長押しで削除</div>
     <div class="chip-row" id="loadSitePresets"></div>
     <input type="text" id="loadSiteCustom" placeholder="その他の地名を入力（任意）">
+    <div id="loadGpsQuickBtn" style="display:none;margin:8px 0;">
+      <button class="modal-btn primary" onclick="saveCustomSite('load')" style="width:100%;padding:12px;font-size:14px;">📍 この場所で記録</button>
+    </div>
     <div class="chip-label" style="margin-top:8px;">配送先メモ (任意)</div>
     <input type="text" id="loadShipper" placeholder="荷主名">
     <input type="text" id="loadCargo" placeholder="荷物内容">
@@ -944,6 +947,9 @@ body {
     <div class="chip-label">タップで選択 / 長押しで削除</div>
     <div class="chip-row" id="unloadSitePresets"></div>
     <input type="text" id="unloadSiteCustom" placeholder="その他の地名を入力（任意）">
+    <div id="unloadGpsQuickBtn" style="display:none;margin:8px 0;">
+      <button class="modal-btn primary" onclick="saveCustomSite('unload')" style="width:100%;padding:12px;font-size:14px;">📍 この場所で記録</button>
+    </div>
     <div class="chip-label" style="margin-top:8px;">配送先メモ (任意)</div>
     <input type="text" id="unloadShipper" placeholder="荷主名">
     <input type="text" id="unloadCargo" placeholder="荷物内容">
@@ -1789,6 +1795,9 @@ function openSiteModal(type) {
   document.getElementById(prefix + 'Shipper').value = '';
   document.getElementById(prefix + 'Cargo').value = '';
   document.getElementById(prefix + 'Weight').value = '';
+  const qbId = type === 'load' ? 'loadGpsQuickBtn' : 'unloadGpsQuickBtn';
+  const qbEl = document.getElementById(qbId);
+  if (qbEl) qbEl.style.display = 'none';
   const modalId = type === 'load' ? 'loadSiteModal' : 'unloadSiteModal';
   document.getElementById(modalId).classList.add('show');
   // GPS自動取得
@@ -1799,6 +1808,8 @@ function openSiteModal(type) {
       customInput.value = area;
       customInput.placeholder = 'その他の地名を入力（任意）';
       showAlert('📍 ' + area + ' を自動取得', 'info');
+      const qb = document.getElementById(type === 'load' ? 'loadGpsQuickBtn' : 'unloadGpsQuickBtn');
+      if (qb) qb.style.display = 'block';
     } else {
       customInput.placeholder = 'その他の地名を入力（任意）';
     }
