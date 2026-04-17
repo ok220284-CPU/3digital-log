@@ -1749,31 +1749,35 @@ function fetchGeoLocation(callback) {
   navigator.geolocation.getCurrentPosition(pos => {
     const lat = pos.coords.latitude;
     const lng = pos.coords.longitude;
-    const url = 'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lng + '&localityLanguage=ja';
-    fetch(url).then(r => r.json()).then(data => {
-      // 市区町村名を抽出
-      let area = '';
-      if (data.city) {
-        area = data.city;
-      } else if (data.locality) {
-        area = data.locality;
-      }
-      // 「○○市」「○○区」「○○町」を取得
-      // localityInfoからさらに詳しく
+    const bdcUrl = 'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lng + '&localityLanguage=ja';
+    fetch(bdcUrl).then(r => r.json()).then(data => {
+      let pref = '', city = '', ward = '';
       if (data.localityInfo && data.localityInfo.administrative) {
-        const admins = data.localityInfo.administrative;
-        // 市区町村レベルを探す（order=8前後が市区町村）
-        for (let i = admins.length - 1; i >= 0; i--) {
-          const a = admins[i];
-          if (a.name && (a.name.endsWith('区') || a.name.endsWith('市') || a.name.endsWith('町') || a.name.endsWith('村'))) {
-            area = a.name;
-            break;
-          }
-        }
+        data.localityInfo.administrative.forEach(a => {
+          if (!a.name) return;
+          if (a.adminLevel === 4 || (a.description && a.description.includes('都道府県'))) pref = a.name;
+          if (a.order === 9 || (a.description && a.description.includes('の市'))) city = a.name;
+          if (a.order === 10 || (a.description && a.description.includes('行政区'))) ward = a.name;
+        });
       }
-      callback(area || null);
+      if (!pref) pref = data.principalSubdivision || '';
+      if (!city) city = data.city || '';
+      if (!ward) ward = data.locality || '';
+      let address = pref;
+      if (city && city !== pref) address += city;
+      if (ward && ward !== city) address += ward;
+      const opQ = '[out:json][timeout:5];(node["office"](around:200,' + lat + ',' + lng + ');way["office"](around:200,' + lat + ',' + lng + ');node["shop"](around:150,' + lat + ',' + lng + ');node["building"="warehouse"](around:200,' + lat + ',' + lng + ');way["building"="warehouse"](around:200,' + lat + ',' + lng + ');node["amenity"](around:100,' + lat + ',' + lng + ');way["amenity"](around:100,' + lat + ',' + lng + '););out tags 3;';
+      fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST', body: 'data=' + encodeURIComponent(opQ)
+      }).then(r => r.json()).then(op => {
+        let facility = '';
+        (op.elements || []).forEach(e => {
+          if (!facility && e.tags && e.tags.name) facility = e.tags.name;
+        });
+        callback(facility ? address + ' ' + facility : address || null);
+      }).catch(() => callback(address || null));
     }).catch(() => callback(null));
-  }, () => callback(null), { timeout: 5000, maximumAge: 60000 });
+  }, () => callback(null), { timeout: 8000, maximumAge: 60000 });
 }
 
 function openSiteModal(type) {
