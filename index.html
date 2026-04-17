@@ -11,7 +11,7 @@
 <meta name="color-scheme" content="dark">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230a0a0a' rx='40'/%3E%3Ccircle cx='90' cy='90' r='60' fill='none' stroke='%23c0c0c0' stroke-width='9'/%3E%3Ccircle cx='90' cy='90' r='18' fill='%23c0c0c0'/%3E%3Cline x1='90' y1='34' x2='90' y2='72' stroke='%23c0c0c0' stroke-width='9' stroke-linecap='round'/%3E%3Cline x1='37' y1='98' x2='74' y2='98' stroke='%23c0c0c0' stroke-width='9' stroke-linecap='round'/%3E%3Cline x1='106' y1='98' x2='143' y2='98' stroke='%23c0c0c0' stroke-width='9' stroke-linecap='round'/%3E%3Ccircle cx='90' cy='90' r='6' fill='%230a0a0a'/%3E%3C/svg%3E">
 <link rel="manifest" href='data:application/json;charset=utf-8,{"name":"デジログ","short_name":"デジログ","description":"デジタル運転日報","start_url":"./","display":"standalone","background_color":"%230a0a0a","theme_color":"%230a0a0a","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27%3E%3Crect width=%27512%27 height=%27512%27 fill=%27%230a0a0a%27 rx=%27100%27/%3E%3Ccircle cx=%27256%27 cy=%27256%27 r=%27170%27 fill=%27none%27 stroke=%27%23c0c0c0%27 stroke-width=%2724%27/%3E%3Ccircle cx=%27256%27 cy=%27256%27 r=%2750%27 fill=%27%23c0c0c0%27/%3E%3Cline x1=%27256%27 y1=%2796%27 x2=%27256%27 y2=%27206%27 stroke=%27%23c0c0c0%27 stroke-width=%2724%27 stroke-linecap=%27round%27/%3E%3Cline x1=%27106%27 y1=%27280%27 x2=%27210%27 y2=%27280%27 stroke=%27%23c0c0c0%27 stroke-width=%2724%27 stroke-linecap=%27round%27/%3E%3Cline x1=%27302%27 y1=%27280%27 x2=%27406%27 y2=%27280%27 stroke=%27%23c0c0c0%27 stroke-width=%2724%27 stroke-linecap=%27round%27/%3E%3Ccircle cx=%27256%27 cy=%27256%27 r=%2716%27 fill=%27%230a0a0a%27/%3E%3C/svg%3E","sizes":"512x512","type":"image/svg+xml","purpose":"any"}]}'>
-<title>デジログ - デジタル運転日報 v4.7</title>
+<title>デジログ - デジタル運転日報 v4.8</title>
 <style>
 :root {
   --bg: #0a0a0a;
@@ -517,10 +517,10 @@ body {
 <div class="actions">
   <button class="action-btn start" onclick="openOdoModal('出庫')"><span class="ico">▶</span>出庫</button>
   <button class="action-btn" onclick="openTenkoModal()">📋 点呼</button>
-  <button class="action-btn" onclick="openSiteModal('load')">📦 荷積</button>
+  <button class="action-btn drive" onclick="logEvent('運転開始', 'drive')"><span class="ico">🚛</span>運転開始</button>
   <button class="action-btn" onclick="openSiteModal('unload')">📥 荷降</button>
   <button class="action-btn rest" onclick="logEvent('休憩', 'rest')"><span class="ico">☕</span>休憩</button>
-  <button class="action-btn drive" onclick="logEvent('運転開始', 'drive')"><span class="ico">🚛</span>運転開始</button>
+  <button class="action-btn" onclick="openSiteModal('load')">📦 荷積</button>
   <button class="action-btn" onclick="logEvent('待機', 'idle')">⏸ 待機</button>
   <button class="action-btn" onclick="openTollModal()">🛣 高速</button>
   <button class="action-btn" onclick="openFuelModal()">⛽ 給油</button>
@@ -661,14 +661,10 @@ body {
 
 <div class="footer-actions" style="flex-wrap:wrap;">
   <button class="footer-btn" onclick="exportLog()">📤 日報出力</button>
-  <button class="footer-btn" onclick="openStatsModal()">📊 集計</button>
-  <button class="footer-btn" onclick="openScoreModal()">⛽ 燃費評価</button>
-  <button class="footer-btn" onclick="openPlanModal()">📋 運行予定</button>
   <button class="footer-btn" onclick="openHistoryModal()">📅 履歴</button>
-  <button class="footer-btn" onclick="openSettingsModal()">⚙ 設定</button>
-  <button class="footer-btn" onclick="toggleAdminMode()" id="adminToggleBtn">👁 管理者モード</button>
+  <button class="footer-btn" onclick="toggleAdminMode()" id="adminToggleBtn">👁 管理者</button>
   <button class="footer-btn" onclick="toggleLogPanel()" id="logToggleBtn">📋 ログ</button>
-  <button class="footer-btn" onclick="document.getElementById('helpModal').classList.add('show')">📖 使い方</button>
+  <button class="footer-btn" onclick="openSettingsModal()">⚙ その他</button>
 </div>
 
 <!-- 設定モーダル -->
@@ -686,9 +682,13 @@ body {
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px;">
+      <button class="modal-btn primary" onclick="closeSettingsModal(); openStatsModal();">📊 週間・月間集計</button>
+      <button class="modal-btn primary" onclick="closeSettingsModal(); openScoreModal();">⛽ 燃費評価</button>
+      <button class="modal-btn primary" onclick="closeSettingsModal(); openPlanModal();">📋 運行予定</button>
       <button class="modal-btn primary" onclick="closeSettingsModal(); openDriverModal();">👤 ドライバー管理</button>
       <button class="modal-btn primary" onclick="closeSettingsModal(); openVehicleModal();">🚛 車両台帳</button>
       <button class="modal-btn primary" onclick="closeSettingsModal(); openBackupModal();">💾 バックアップ/復元</button>
+      <button class="modal-btn primary" onclick="closeSettingsModal(); document.getElementById('helpModal').classList.add('show');">📖 使い方ガイド</button>
       <button class="modal-btn danger" onclick="closeSettingsModal(); resetToday();">🗑 本日リセット</button>
       <button class="modal-btn" onclick="closeSettingsModal()">閉じる</button>
     </div>
@@ -2112,8 +2112,17 @@ function openOdoModal(type) {
     } else {
       hint.textContent = '';
     }
+    // 直近使った地点をデフォルトで入力
+    const places = getOdoPlaces();
+    if (places.length > 0) {
+      document.getElementById('odoPlace').value = places[0].name;
+    }
   } else if (type === '帰庫' && state.odoStart) {
     hint.textContent = `本日出庫時: ${state.odoStart} km`;
+    const places = getOdoPlaces();
+    if (places.length > 0) {
+      document.getElementById('odoPlace').value = places[0].name;
+    }
   } else {
     hint.textContent = '';
   }
