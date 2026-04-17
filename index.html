@@ -1549,6 +1549,24 @@ function logEvent(label, newStatus, extra = {}) {
     if (state.load === '実車') {
       setTimeout(() => showAlert('⚠️ 実車のまま帰庫しています。荷降しを確認してください', 'warn'), 500);
     }
+    // 高速走行があったのに料金未入力がないかチェック
+    const myLogs = logs.filter(l => l.driver === currentDriverId);
+    const hadHighway = myLogs.some(l => l.road === '高速道');
+    const myTolls = (state.tolls || []).filter(t => t.driver === currentDriverId);
+    if (hadHighway && myTolls.length === 0) {
+      setTimeout(() => {
+        showAlert('⚠️ 高速走行の記録がありますが、料金が未入力です', 'warn');
+        setTimeout(() => openTollModal(), 1500);
+      }, 1500);
+    } else if (state.road === '高速道') {
+      // 高速道のまま帰庫 → 最後の高速料金を入力
+      state.road = '一般道';
+      updateToggleUI();
+      setTimeout(() => {
+        showAlert('🛣 高速料金を入力してください', 'info');
+        setTimeout(() => openTollModal(), 1000);
+      }, 1500);
+    }
     setLastEnd(currentDriverId, now);
     state.dutyStart = null;
     state.contDriveStart = null;
@@ -1654,9 +1672,14 @@ document.querySelectorAll('.toggle-opt').forEach(opt => {
     const type = opt.dataset.toggle;
     const val = opt.dataset.val;
     if (type === 'road') {
+      const prevRoad = state.road;
       state.road = val;
       autoRoadManualOverride = true;
       setTimeout(() => { autoRoadManualOverride = false; }, 60000);
+      // 高速→一般道に手動切替した場合、高速料金入力を促す
+      if (prevRoad === '高速道' && val === '一般道') {
+        setTimeout(() => openTollModal(), 800);
+      }
     }
     if (type === 'load') state.load = val;
     updateToggleUI();
@@ -2991,6 +3014,8 @@ function onGpsSuccess(pos) {
         saveState();
         showAlert('🛣 一般道に切替（自動）', 'info');
         speak('一般道です');
+        // 高速料金入力を促す
+        setTimeout(() => openTollModal(), 1500);
       }
     }
   }
