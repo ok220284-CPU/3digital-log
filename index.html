@@ -1539,6 +1539,9 @@ function logEvent(label, newStatus, extra = {}) {
     state.contDriveStart = null;
     state.contDriveAccum = 0;
     state.pendingLoadChange = null;
+    autoRoadHighCount = 0;
+    autoRoadLowCount = 0;
+    autoRoadManualOverride = false;
   }
   let autoLoadChanged = null;
   // 荷積: 即時切替せず、次の運転開始時に反映するようpendingにセット
@@ -1630,7 +1633,11 @@ document.querySelectorAll('.toggle-opt').forEach(opt => {
   opt.addEventListener('click', () => {
     const type = opt.dataset.toggle;
     const val = opt.dataset.val;
-    if (type === 'road') state.road = val;
+    if (type === 'road') {
+      state.road = val;
+      autoRoadManualOverride = true;
+      setTimeout(() => { autoRoadManualOverride = false; }, 60000);
+    }
     if (type === 'load') state.load = val;
     updateToggleUI();
     saveState();
@@ -2765,6 +2772,9 @@ let gpsWatchId = null;
 let gpsLastPos = null;
 let gpsDistance = 0;
 let gpsCurrentSpeed = 0;
+let autoRoadHighCount = 0;
+let autoRoadLowCount = 0;
+let autoRoadManualOverride = false;
 let gpsLastRouteRecord = 0;
 let wakeLock = null;
 function loadGpsSettings() {
@@ -2888,6 +2898,30 @@ function onGpsSuccess(pos) {
   if (now - gpsLastRouteRecord > 30000) {
     appendRoutePoint(pos.coords.latitude, pos.coords.longitude, gpsCurrentSpeed);
     gpsLastRouteRecord = now;
+  }
+  // 高速道/一般道の自動判定（速度ベース）
+  if (state.status === 'drive' && !autoRoadManualOverride) {
+    if (gpsCurrentSpeed >= 60) {
+      autoRoadHighCount++;
+      autoRoadLowCount = 0;
+      if (autoRoadHighCount >= 3 && state.road === '一般道') {
+        state.road = '高速道';
+        updateToggleUI();
+        saveState();
+        showAlert('🛣 高速道路を検出（自動切替）', 'info');
+        speak('高速道路です');
+      }
+    } else if (gpsCurrentSpeed < 40) {
+      autoRoadLowCount++;
+      autoRoadHighCount = 0;
+      if (autoRoadLowCount >= 10 && state.road === '高速道') {
+        state.road = '一般道';
+        updateToggleUI();
+        saveState();
+        showAlert('🛣 一般道に切替（自動）', 'info');
+        speak('一般道です');
+      }
+    }
   }
 }
 function onGpsError(err) {
