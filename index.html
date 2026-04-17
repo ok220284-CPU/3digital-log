@@ -762,7 +762,6 @@ body {
     <div class="chip-label">クイック選択 (タップで入力/長押しで削除)</div>
     <div class="chip-row" id="fuelPresets"></div>
     <input type="number" id="fuelLiter" placeholder="給油量 (L) ※必須" step="0.01" inputmode="decimal">
-    <input type="number" id="fuelOdo" placeholder="オドメーター (km) ※任意" inputmode="numeric">
     <div style="display:flex;align-items:center;gap:8px;margin:6px 0 10px;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;" onclick="toggleFuelYen()">
       <div id="fuelYenToggle" style="width:36px;height:20px;background:var(--border);border-radius:10px;position:relative;transition:0.2s;">
         <div id="fuelYenDot" style="width:16px;height:16px;background:var(--white);border-radius:50%;position:absolute;top:2px;left:2px;transition:0.2s;"></div>
@@ -2037,7 +2036,7 @@ function openFuelModal() {
   if (!currentDriverId) { showAlert('ドライバーを選択してください', 'info'); return; }
   document.getElementById('fuelLiter').value = '';
   document.getElementById('fuelYen').value = '';
-  document.getElementById('fuelOdo').value = '';
+  
   renderFuelPresets();
   fuelYenEnabled = true;
   toggleFuelYen();
@@ -2047,7 +2046,7 @@ function closeFuelModal() { document.getElementById('fuelModal').classList.remov
 function saveFuel() {
   const liter = parseFloat(document.getElementById('fuelLiter').value);
   const yen = fuelYenEnabled ? (parseInt(document.getElementById('fuelYen').value) || null) : null;
-  const odo = parseInt(document.getElementById('fuelOdo').value) || null;
+  const odo = null;
   if (!liter) { showAlert('給油量を入力してください', 'info'); return; }
   state.fuels.push({ time: Date.now(), liter, yen, odo, driver: currentDriverId });
   addFuelPreset(liter);
