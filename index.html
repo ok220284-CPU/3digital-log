@@ -546,6 +546,15 @@ body {
   </div>
 </div>
 
+<div style="display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-bottom:4px;padding:0 4px;">
+  <span style="font-size:10px;color:var(--text-dim);">GPS</span>
+  <div style="cursor:pointer;" onclick="toggleGps()">
+    <div id="gpsToggleMini" style="width:28px;height:16px;background:var(--border);border-radius:8px;position:relative;transition:0.2s;">
+      <div id="gpsToggleMiniDot" style="width:12px;height:12px;background:var(--white);border-radius:50%;position:absolute;top:2px;left:2px;transition:0.2s;"></div>
+    </div>
+  </div>
+  <span id="gpsIndicatorMini" style="width:6px;height:6px;border-radius:50%;background:var(--text-dim);"></span>
+</div>
 <div class="status-panel">
   <div class="status-label">▼ 現在のステータス</div>
   <div class="status-value idle" id="statusValue">待機中</div>
@@ -2790,6 +2799,19 @@ let gpsLastRouteRecord = 0;
 let wakeLock = null;
 function loadGpsSettings() {
   const val = localStorage.getItem(STORAGE.gpsEnabled);
+  // 一度もGPS設定をしていない場合、GPS許可済みなら自動ONにする
+  if (val === null && navigator.geolocation) {
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then(result => {
+        if (result.state === 'granted') {
+          gpsEnabled = true;
+          localStorage.setItem(STORAGE.gpsEnabled, 'true');
+          startGps();
+          updateGpsToggleUI();
+        }
+      }).catch(() => {});
+    }
+  }
   gpsEnabled = val === 'true';
   const routeRaw = localStorage.getItem(STORAGE.routeToday);
   if (routeRaw) {
@@ -2846,13 +2868,26 @@ function toggleGps() {
 function updateGpsToggleUI() {
   const toggle = document.getElementById('gpsToggle');
   const dot = document.getElementById('gpsToggleDot');
-  if (!toggle) return;
-  if (gpsEnabled) {
-    toggle.style.background = 'var(--accent)';
-    dot.style.left = '18px';
-  } else {
-    toggle.style.background = 'var(--border)';
-    dot.style.left = '2px';
+  if (toggle) {
+    if (gpsEnabled) {
+      toggle.style.background = 'var(--accent)';
+      dot.style.left = '18px';
+    } else {
+      toggle.style.background = 'var(--border)';
+      dot.style.left = '2px';
+    }
+  }
+  // ミニトグルも同期
+  const mini = document.getElementById('gpsToggleMini');
+  const miniDot = document.getElementById('gpsToggleMiniDot');
+  if (mini) {
+    if (gpsEnabled) {
+      mini.style.background = 'var(--accent)';
+      miniDot.style.left = '14px';
+    } else {
+      mini.style.background = 'var(--border)';
+      miniDot.style.left = '2px';
+    }
   }
 }
 function startGps() {
@@ -2899,6 +2934,11 @@ function onGpsSuccess(pos) {
   if (ind) {
     ind.style.background = 'var(--green)';
     ind.style.boxShadow = '0 0 6px var(--green)';
+  }
+  const indMini = document.getElementById('gpsIndicatorMini');
+  if (indMini) {
+    indMini.style.background = 'var(--green)';
+    indMini.style.boxShadow = '0 0 4px var(--green)';
   }
   let speed = pos.coords.speed;
   if (speed !== null && !isNaN(speed) && speed >= 0) {
