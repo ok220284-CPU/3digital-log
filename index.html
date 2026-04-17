@@ -11,7 +11,7 @@
 <meta name="color-scheme" content="dark">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230a0a0a' rx='40'/%3E%3Ccircle cx='90' cy='90' r='60' fill='none' stroke='%23c0c0c0' stroke-width='9'/%3E%3Ccircle cx='90' cy='90' r='18' fill='%23c0c0c0'/%3E%3Cline x1='90' y1='34' x2='90' y2='72' stroke='%23c0c0c0' stroke-width='9' stroke-linecap='round'/%3E%3Cline x1='37' y1='98' x2='74' y2='98' stroke='%23c0c0c0' stroke-width='9' stroke-linecap='round'/%3E%3Cline x1='106' y1='98' x2='143' y2='98' stroke='%23c0c0c0' stroke-width='9' stroke-linecap='round'/%3E%3Ccircle cx='90' cy='90' r='6' fill='%230a0a0a'/%3E%3C/svg%3E">
 <link rel="manifest" href='data:application/json;charset=utf-8,{"name":"デジログ","short_name":"デジログ","description":"デジタル運転日報","start_url":"./","display":"standalone","background_color":"%230a0a0a","theme_color":"%230a0a0a","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27%3E%3Crect width=%27512%27 height=%27512%27 fill=%27%230a0a0a%27 rx=%27100%27/%3E%3Ccircle cx=%27256%27 cy=%27256%27 r=%27170%27 fill=%27none%27 stroke=%27%23c0c0c0%27 stroke-width=%2724%27/%3E%3Ccircle cx=%27256%27 cy=%27256%27 r=%2750%27 fill=%27%23c0c0c0%27/%3E%3Cline x1=%27256%27 y1=%2796%27 x2=%27256%27 y2=%27206%27 stroke=%27%23c0c0c0%27 stroke-width=%2724%27 stroke-linecap=%27round%27/%3E%3Cline x1=%27106%27 y1=%27280%27 x2=%27210%27 y2=%27280%27 stroke=%27%23c0c0c0%27 stroke-width=%2724%27 stroke-linecap=%27round%27/%3E%3Cline x1=%27302%27 y1=%27280%27 x2=%27406%27 y2=%27280%27 stroke=%27%23c0c0c0%27 stroke-width=%2724%27 stroke-linecap=%27round%27/%3E%3Ccircle cx=%27256%27 cy=%27256%27 r=%2716%27 fill=%27%230a0a0a%27/%3E%3C/svg%3E","sizes":"512x512","type":"image/svg+xml","purpose":"any"}]}'>
-<title>デジログ - デジタル運転日報 v3.2</title>
+<title>デジログ - デジタル運転日報 v4.0</title>
 <style>
 :root {
   --bg: #0a0a0a;
@@ -489,6 +489,11 @@ body {
 }
 
 </style>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -634,7 +639,8 @@ body {
     <div class="log-title">▼ TODAY'S LOG</div>
     <div class="log-count" id="logCount">0 件</div>
   </div>
-  <div id="logList"></div>
+  <div id="adminPanel" style="display:none;margin:8px;"></div>
+    <div id="logList"></div>
   <div style="font-size:12px;color:var(--text-dim);text-align:center;margin-top:8px;font-style:italic;">※ ログをタップすると編集・削除できます</div>
 </div>
 
@@ -645,6 +651,7 @@ body {
   <button class="footer-btn" onclick="openPlanModal()">📋 運行予定</button>
   <button class="footer-btn" onclick="openHistoryModal()">📅 履歴</button>
   <button class="footer-btn" onclick="openSettingsModal()">⚙ 設定</button>
+  <button class="footer-btn" onclick="toggleAdminMode()" id="adminToggleBtn">👁 管理者モード</button>
 </div>
 
 <!-- 設定モーダル -->
@@ -1042,7 +1049,129 @@ body {
   </div>
 </div>
 
-<script>const STORAGE = {
+<script>
+// ===== Firebase Integration =====
+const firebaseConfig = {
+  apiKey: "AIzaSyDPe0fdZCV2pw3X8t9cQbtYMk6OsOlNG60",
+  authDomain: "digital-log-15cec.firebaseapp.com",
+  databaseURL: "https://digital-log-15cec-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "digital-log-15cec",
+  storageBucket: "digital-log-15cec.firebasestorage.app",
+  messagingSenderId: "684413692642",
+  appId: "1:684413692642:web:f897721ea2f62cac2d4cbb"
+};
+const fbApp = firebase.initializeApp(firebaseConfig);
+const fbAuth = firebase.auth();
+const fbDb = firebase.database();
+let fbUid = null;
+let fbSyncEnabled = false;
+let fbAdminMode = false;
+
+fbAuth.signInAnonymously().then(cred => {
+  fbUid = cred.user.uid;
+  fbSyncEnabled = true;
+  console.log('Firebase: 匿名ログイン成功', fbUid);
+  setTimeout(() => fbSyncCurrentState(), 1000);
+}).catch(err => {
+  console.warn('Firebase: ログイン失敗', err);
+  fbSyncEnabled = false;
+});
+
+function fbSyncCurrentState() {
+  if (!fbSyncEnabled || !currentDriverId) return;
+  const driver = drivers.find(d => d.id === currentDriverId);
+  if (!driver) return;
+  const ref = fbDb.ref('drivers/' + currentDriverId);
+  const myLogs = logs.filter(l => l.driver === currentDriverId).map(l => ({
+    time: l.time, label: l.label, load: l.load, road: l.road
+  }));
+  const myFuels = (state.fuels || []).filter(f => f.driver === currentDriverId);
+  const myTolls = (state.tolls || []).filter(t => t.driver === currentDriverId);
+  const data = {
+    name: driver.name,
+    vehicle: driver.vehicle || '',
+    status: state.status || 'idle',
+    statusLabel: state.statusLabel || '',
+    load: state.load || '空車',
+    road: state.road || '一般道',
+    lastUpdate: Date.now(),
+    date: todayKey(),
+    logs: myLogs,
+    fuels: myFuels,
+    tolls: myTolls
+  };
+  if (state.odoStart) data.odoStart = state.odoStart;
+  if (state.odoEnd) data.odoEnd = state.odoEnd;
+  if (state.manualDistance) data.manualDistance = state.manualDistance;
+  ref.set(data).catch(err => console.warn('Firebase sync error:', err));
+}
+
+let fbAdminListener = null;
+function fbStartAdminWatch() {
+  if (fbAdminListener) return;
+  fbAdminListener = fbDb.ref('drivers').on('value', snap => {
+    renderAdminPanel(snap.val() || {});
+  });
+}
+function fbStopAdminWatch() {
+  if (fbAdminListener) {
+    fbDb.ref('drivers').off('value', fbAdminListener);
+    fbAdminListener = null;
+  }
+}
+function renderAdminPanel(allDrivers) {
+  const panel = document.getElementById('adminPanel');
+  if (!panel) return;
+  if (Object.keys(allDrivers).length === 0) {
+    panel.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:20px;">まだデータがありません</div>';
+    return;
+  }
+  let html = '';
+  Object.entries(allDrivers).sort((a,b) => (b[1].lastUpdate||0) - (a[1].lastUpdate||0)).forEach(([id, d]) => {
+    const ago = d.lastUpdate ? Math.floor((Date.now() - d.lastUpdate) / 60000) : -1;
+    const agoText = ago < 0 ? '' : ago < 1 ? '(たった今)' : '(' + ago + '分前)';
+    const sc = d.status === 'drive' ? '#4CAF50' : d.status === 'rest' ? '#FF9800' : d.status === 'idle' ? '#9E9E9E' : '#2196F3';
+    const last = d.logs && d.logs.length > 0 ? d.logs[d.logs.length - 1] : null;
+    const lt = last ? new Date(last.time).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}) : '';
+    const ll = last ? last.label : '-';
+    let dist = '-';
+    if (d.odoStart && d.odoEnd) dist = (d.odoEnd - d.odoStart) + 'km';
+    else if (d.manualDistance) dist = d.manualDistance + 'km';
+    html += '<div style="background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+    html += '<span style="font-weight:700;font-size:14px;">' + (d.name||id) + '</span>';
+    html += '<span style="font-size:10px;color:var(--text-dim);">' + agoText + '</span></div>';
+    html += '<div style="display:flex;gap:8px;flex-wrap:wrap;font-size:11px;">';
+    html += '<span style="background:'+sc+';color:#fff;padding:2px 8px;border-radius:10px;">' + (d.statusLabel||d.status||'?') + '</span>';
+    html += '<span style="background:var(--panel);padding:2px 8px;border-radius:10px;">' + (d.load||'?') + '</span>';
+    html += '<span style="background:var(--panel);padding:2px 8px;border-radius:10px;">' + (d.road||'?') + '</span>';
+    html += '<span style="background:var(--panel);padding:2px 8px;border-radius:10px;">走行:' + dist + '</span></div>';
+    html += '<div style="font-size:11px;color:var(--text-dim);margin-top:4px;">最終: ' + lt + ' ' + ll + '</div>';
+    if (d.vehicle) html += '<div style="font-size:10px;color:var(--text-dim);margin-top:2px;">🚛 ' + d.vehicle + '</div>';
+    html += '</div>';
+  });
+  panel.innerHTML = html;
+}
+function toggleAdminMode() {
+  fbAdminMode = !fbAdminMode;
+  const panel = document.getElementById('adminPanel');
+  const btn = document.getElementById('adminToggleBtn');
+  if (fbAdminMode) {
+    panel.style.display = 'block';
+    btn.style.background = 'var(--accent)';
+    btn.textContent = '👁 管理者OFF';
+    fbStartAdminWatch();
+    showAlert('管理者モード ON', 'info');
+  } else {
+    panel.style.display = 'none';
+    btn.style.background = '';
+    btn.textContent = '👁 管理者モード';
+    fbStopAdminWatch();
+  }
+}
+// ===== /Firebase Integration =====
+
+const STORAGE = {
   drivers: 'dt_drivers',
   currentDriver: 'dt_current_driver',
   logs: 'dt_logs',
@@ -1141,6 +1270,7 @@ function saveState() {
     date: todayKey(),
     state: state
   }));
+  fbSyncCurrentState();
 }
 function loadDrivers() {
   const saved = localStorage.getItem(STORAGE.drivers);
@@ -1171,6 +1301,7 @@ function saveLogs() {
     date: todayKey(),
     logs: logs
   }));
+  fbSyncCurrentState();
 }
 function archiveLogs(date, logsToArchive) {
   const saved = localStorage.getItem(STORAGE.history);
