@@ -1828,9 +1828,12 @@ function fetchGeoLocation(callback) {
       if (data.localityInfo && data.localityInfo.administrative) {
         data.localityInfo.administrative.forEach(a => {
           if (!a.name) return;
-          if (a.adminLevel === 4 || (a.description && a.description.includes('都道府県'))) pref = a.name;
-          if (a.order === 9 || (a.description && a.description.includes('の市'))) city = a.name;
-          if (a.order === 10 || (a.description && a.description.includes('行政区'))) ward = a.name;
+          // 旧国名(令制国)や地域区分は除外
+          const desc = a.description || '';
+          if (desc.includes('令制国') || desc.includes('地域区分') || desc.includes('五畿七道')) return;
+          if (a.adminLevel === 4 || desc.includes('都道府県')) pref = a.name;
+          if (a.order === 9 || desc.includes('の市')) city = a.name;
+          if (a.order === 10 || desc.includes('行政区')) ward = a.name;
         });
       }
       if (!pref) pref = data.principalSubdivision || '';
