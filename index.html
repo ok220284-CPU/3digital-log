@@ -1830,10 +1830,8 @@ function fetchGeoLocation(callback) {
     const lng = pos.coords.longitude;
     const bdcUrl = 'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lng + '&localityLanguage=ja';
     fetch(bdcUrl).then(r => r.json()).then(data => {
-      let pref = '', city = '', ward = '';
+      let pref = '', city = '', ward = '', county = '', town = '';
       if (data.localityInfo && data.localityInfo.administrative) {
-        let county = '';  // 郡
-        let town = '';   // 町・村
         data.localityInfo.administrative.forEach(a => {
           if (!a.name) return;
           const desc = a.description || '';
