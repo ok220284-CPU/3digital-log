@@ -1826,22 +1826,35 @@ function fetchGeoLocation(callback) {
     fetch(bdcUrl).then(r => r.json()).then(data => {
       let pref = '', city = '', ward = '';
       if (data.localityInfo && data.localityInfo.administrative) {
+        let county = '';  // 郡
+        let town = '';   // 町・村
         data.localityInfo.administrative.forEach(a => {
           if (!a.name) return;
-          // 旧国名(令制国)や地域区分は除外
           const desc = a.description || '';
+          // 旧国名(令制国)や地域区分は除外
           if (desc.includes('令制国') || desc.includes('地域区分') || desc.includes('五畿七道')) return;
           if (a.adminLevel === 4 || desc.includes('都道府県')) pref = a.name;
-          if (a.order === 9 || desc.includes('の市')) city = a.name;
-          if (a.order === 10 || desc.includes('行政区')) ward = a.name;
+          if (desc.includes('の郡') || a.name.endsWith('郡')) county = a.name;
+          if (desc.includes('の市') || a.name.endsWith('市')) city = a.name;
+          if (desc.includes('行政区') || (a.name.endsWith('区') && !a.name.endsWith('郡区'))) ward = a.name;
+          if (desc.includes('の町') || desc.includes('の村')) town = a.name;
         });
       }
       if (!city) city = data.city || '';
       if (!ward) ward = data.locality || '';
-      // 都道府県は省略、市区町村のみ表示
+      // 都道府県は省略
       let address = '';
-      if (city) address += city;
-      if (ward && ward !== city) address += ward;
+      if (town) {
+        // 町・村の場合: 郡+町村 (例: 南河内郡千早赤阪村)
+        if (county) address += county;
+        address += town;
+      } else if (city) {
+        // 市の場合: 市+区 (例: 神戸市中央区)
+        address += city;
+        if (ward && ward !== city) address += ward;
+      } else if (ward) {
+        address += ward;
+      }
       const opQ = '[out:json][timeout:5];(node["office"](around:200,' + lat + ',' + lng + ');way["office"](around:200,' + lat + ',' + lng + ');node["shop"](around:150,' + lat + ',' + lng + ');node["building"="warehouse"](around:200,' + lat + ',' + lng + ');way["building"="warehouse"](around:200,' + lat + ',' + lng + ');node["amenity"](around:100,' + lat + ',' + lng + ');way["amenity"](around:100,' + lat + ',' + lng + '););out tags 3;';
       fetch('https://overpass-api.de/api/interpreter', {
         method: 'POST', body: 'data=' + encodeURIComponent(opQ)
