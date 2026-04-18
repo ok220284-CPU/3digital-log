@@ -1472,6 +1472,8 @@ function tick() {
   }
 }
 const SPEECH_DICT = {
+  '高速道路': 'こうそくどうろ',
+  '一般道路': 'いっぱんどうろ',
   '荷降': 'におろし',
   '荷積み': 'にづみ',
   '荷積': 'にづみ',
@@ -3017,7 +3019,7 @@ function onGpsSuccess(pos) {
   }
   // 高速道/一般道の自動判定（速度ベース）
   if (state.status === 'drive' && !autoRoadManualOverride) {
-    if (gpsCurrentSpeed >= 60) {
+    if (gpsCurrentSpeed >= 75) {
       autoRoadHighCount++;
       autoRoadLowCount = 0;
       if (autoRoadHighCount >= 3 && state.road === '一般道') {
