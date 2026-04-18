@@ -3661,8 +3661,24 @@ function saveEditLog() {
 function deleteLog() {
   if (editingLogIdx === null) return;
   const idx = editingLogIdx;
+  const l = logs[idx];
   closeEditLog();
-  showDeleteConfirm(idx);
+  // ワンタップで即削除
+  if (l.fuelLiter !== undefined) {
+    state.fuels = state.fuels.filter(f => !(f.liter === l.fuelLiter && f.yen === l.fuelYen));
+  }
+  if (l.tollYen !== undefined) {
+    state.tolls = state.tolls.filter(t => !(t.yen === l.tollYen && t.from === l.tollFrom));
+  }
+  const base = l.baseAction || l.label;
+  if (base === '出庫') state.odoStart = null;
+  if (base === '帰庫') state.odoEnd = null;
+  logs.splice(idx, 1);
+  saveLogs();
+  saveState();
+  updateSummaryUI();
+  renderLogs();
+  showAlert('✓ 削除しました', 'info');
 }
 
 function showDeleteConfirm(idx) {
