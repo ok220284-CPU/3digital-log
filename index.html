@@ -1723,7 +1723,8 @@ function logEvent(label, newStatus, extra = {}) {
       showAlert(`自動: ${autoLoadChanged}に切替`, 'info');
     }, 1200);
   }
-  if (baseAction === '荷降' && state.load === '実車') {
+  if (baseAction === '荷降') {
+    // 荷降時は必ず積載確認モーダルを表示(現在の積載状態に関わらず)
     setTimeout(() => {
       document.getElementById('unloadConfirmModal').classList.add('show');
     }, 800);
