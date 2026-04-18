@@ -817,17 +817,33 @@ body {
   <div class="modal">
     <h3>▼ バックアップ / 復元</h3>
     <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.5;">
-      すべてのデータ（ドライバー・ログ・履歴・プリセット等）をJSONファイルで保存・復元できます。機種変更時や定期バックアップに。
+      すべてのデータ（ドライバー・ログ・履歴・プリセット等）を保存・復元できます。
     </div>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <button class="modal-btn primary" onclick="exportBackup()">📤 全データをJSONで保存</button>
-      <label class="modal-btn primary" style="display:block;text-align:center;">
-        📥 JSONファイルから復元
-        <input type="file" id="backupFile" accept=".json" style="display:none;" onchange="importBackup(event)">
-      </label>
-      <button class="modal-btn" onclick="closeBackupModal()">キャンセル</button>
+
+    <!-- クラウドバックアップ -->
+    <div style="background:var(--bg);border:1px solid #4285F4;border-radius:6px;padding:10px;margin-bottom:10px;">
+      <div style="font-weight:700;color:#4FC3F7;margin-bottom:8px;font-size:12px;">☁ クラウドバックアップ (Firebase)</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">日報出力時に自動保存されます。機種変更時はここから復元。</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <button class="modal-btn primary" onclick="fbBackupAllManual()" style="background:#4285F4;color:#fff;">☁ 今すぐクラウド保存</button>
+        <button class="modal-btn primary" onclick="fbRestoreBackup()" style="background:#0288D1;color:#fff;">☁ クラウドから復元</button>
+      </div>
     </div>
-    <div style="font-size:10px;color:var(--red);margin-top:12px;text-align:center;">
+
+    <!-- ローカルバックアップ -->
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:10px;">
+      <div style="font-weight:700;color:var(--text);margin-bottom:8px;font-size:12px;">💾 ファイル保存 (JSON)</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <button class="modal-btn primary" onclick="exportBackup()">📤 JSONで保存</button>
+        <label class="modal-btn primary" style="display:block;text-align:center;">
+          📥 JSONから復元
+          <input type="file" id="backupFile" accept=".json" style="display:none;" onchange="importBackup(event)">
+        </label>
+      </div>
+    </div>
+
+    <button class="modal-btn" onclick="closeBackupModal()" style="width:100%;">閉じる</button>
+    <div style="font-size:10px;color:var(--red);margin-top:10px;text-align:center;">
       ※ 復元すると現在のデータは上書きされます
     </div>
   </div>
@@ -1325,6 +1341,86 @@ function toggleAdminMode() {
     fbStopAdminWatch();
   }
 }
+
+// ===== 自動バックアップ機能 =====
+function fbBackupAll() {
+  if (!fbSyncEnabled || !currentDriverId) return Promise.reject('Firebase未接続');
+  const backup = {
+    version: '2.1',
+    backupAt: new Date().toISOString(),
+    driverId: currentDriverId,
+    data: {}
+  };
+  Object.keys(STORAGE).forEach(key => {
+    const val = localStorage.getItem(STORAGE[key]);
+    if (val !== null) backup.data[STORAGE[key]] = val;
+  });
+  const ref = fbDb.ref('backups/' + currentDriverId);
+  return ref.set(backup);
+}
+function fbRestoreBackup() {
+  if (!fbSyncEnabled || !currentDriverId) {
+    showAlert('Firebase未接続またはドライバー未選択', 'warn');
+    return;
+  }
+  const ref = fbDb.ref('backups/' + currentDriverId);
+  ref.once('value').then(snap => {
+    const backup = snap.val();
+    if (!backup || !backup.data) {
+      showAlert('クラウドバックアップがありません', 'info');
+      return;
+    }
+    // 確認モーダル
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay show';
+    overlay.style.zIndex = '300';
+    const date = backup.backupAt ? new Date(backup.backupAt).toLocaleString('ja-JP') : '不明';
+    overlay.innerHTML = `<div class="modal" style="max-width:340px;text-align:center;">
+      <h3>☁ クラウドから復元</h3>
+      <div style="font-size:13px;color:var(--white);margin:14px 0;line-height:1.6;">
+        <b>バックアップ日時:</b><br>${date}<br><br>
+        現在の端末データを<b>上書き</b>して<br>クラウドの状態に戻します。続行しますか？
+      </div>
+      <div class="modal-btns" style="flex-direction:column;gap:8px;">
+        <button class="modal-btn danger" id="restoreConfirm">☁ 復元する</button>
+        <button class="modal-btn" id="restoreCancel">キャンセル</button>
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#restoreCancel').onclick = () => overlay.remove();
+    overlay.querySelector('#restoreConfirm').onclick = () => {
+      Object.keys(STORAGE).forEach(key => localStorage.removeItem(STORAGE[key]));
+      Object.keys(backup.data).forEach(key => {
+        localStorage.setItem(key, backup.data[key]);
+      });
+      overlay.remove();
+      showAlert('✓ 復元しました。再読込します', 'info');
+      setTimeout(() => location.reload(), 1500);
+    };
+  }).catch(err => {
+    showAlert('復元失敗: ' + err.message, 'warn');
+  });
+}
+// 自動バックアップ (日報出力時に自動実行)
+function autoBackupToCloud() {
+  if (!fbSyncEnabled) return;
+  fbBackupAll().then(() => {
+    console.log('✓ 自動バックアップ完了');
+  }).catch(err => {
+    console.warn('自動バックアップ失敗:', err);
+  });
+}
+// 手動バックアップ (ボタンから呼ばれる)
+function fbBackupAllManual() {
+  if (!fbSyncEnabled) { showAlert('Firebase未接続', 'warn'); return; }
+  if (!currentDriverId) { showAlert('ドライバーを選択してください', 'info'); return; }
+  fbBackupAll().then(() => {
+    showAlert('☁ クラウド保存完了', 'info');
+  }).catch(err => {
+    showAlert('保存失敗: ' + err.message, 'warn');
+  });
+}
+
 // ===== /Firebase Integration =====
 
 const STORAGE = {
@@ -4260,6 +4356,8 @@ function exportLog() {
   hint.textContent = driver.email ? `メール宛先: ${driver.email}` : 'メール宛先未登録(ドライバー設定で登録可)';
   updateManualDistanceUI();
   document.getElementById('sendModal').classList.add('show');
+  // 日報出力時に自動でクラウドバックアップ
+  autoBackupToCloud();
 }
 function showInspectionRequired() {
   const overlay = document.createElement('div');
