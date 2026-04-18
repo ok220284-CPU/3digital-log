@@ -1835,12 +1835,34 @@ function renderLogs() {
     const t = new Date(l.time);
     const meta = `${l.road}/${l.load}`;
     const idx = logs.indexOf(l);
-    return `<div class="log-entry" onclick="openEditLog(${idx})" style="cursor:pointer;">
-      <div class="log-time">${fmtTime(t)}</div>
-      <div class="log-event">${l.label}</div>
-      <div class="log-meta">${meta}</div>
+    return `<div class="log-entry" style="display:flex;align-items:center;gap:6px;">
+      <div onclick="openEditLog(${idx})" style="flex:1;display:flex;gap:10px;cursor:pointer;align-items:center;">
+        <div class="log-time">${fmtTime(t)}</div>
+        <div class="log-event" style="flex:1;">${l.label}</div>
+        <div class="log-meta">${meta}</div>
+      </div>
+      <button onclick="deleteLogDirect(${idx})" style="background:none;border:1px solid var(--red);color:var(--red);width:26px;height:26px;border-radius:4px;font-size:13px;cursor:pointer;flex-shrink:0;padding:0;">×</button>
     </div>`;
   }).join('');
+}
+function deleteLogDirect(idx) {
+  const l = logs[idx];
+  if (!l) return;
+  if (l.fuelLiter !== undefined) {
+    state.fuels = state.fuels.filter(f => !(f.liter === l.fuelLiter && f.yen === l.fuelYen));
+  }
+  if (l.tollYen !== undefined) {
+    state.tolls = state.tolls.filter(t => !(t.yen === l.tollYen && t.from === l.tollFrom));
+  }
+  const base = l.baseAction || l.label;
+  if (base === '出庫') state.odoStart = null;
+  if (base === '帰庫') state.odoEnd = null;
+  logs.splice(idx, 1);
+  saveLogs();
+  saveState();
+  updateSummaryUI();
+  renderLogs();
+  showAlert('✓ 削除', 'info');
 }
 let loadSites = [];
 let unloadSites = [];
