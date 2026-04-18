@@ -4978,9 +4978,15 @@ function downloadPDF() {
   const active = getActiveVehicle();
   const vehicle = active ? active.vehicle.number + (active.vehicle.model ? ' / ' + active.vehicle.model : '') : (driver.vehicle || '-');
   let distText = '-';
-  if (state.odoStart && state.odoEnd) distText = `${state.odoEnd - state.odoStart} km (${state.odoStart} → ${state.odoEnd})`;
-  else if (state.manualDistance) distText = `${state.manualDistance} km (手動)`;
-  const effText = (totalL > 0 && state.odoStart && state.odoEnd) ? `${((state.odoEnd - state.odoStart) / totalL).toFixed(2)} km/L` : '-';
+  let distValue = null;
+  if (state.odoStart && state.odoEnd) {
+    distValue = state.odoEnd - state.odoStart;
+    distText = `${distValue} km (${state.odoStart} → ${state.odoEnd})`;
+  } else if (state.manualDistance && state.manualDistance > 0) {
+    distValue = state.manualDistance;
+    distText = `${state.manualDistance} km (手動)`;
+  }
+  const effText = (totalL > 0 && distValue !== null) ? `${(distValue / totalL).toFixed(2)} km/L` : '-';
   const startLog = filtered.find(l => l.label === '出庫' || l.baseAction === '出庫');
   const endLog = filtered.slice().reverse().find(l => l.label === '帰庫' || l.baseAction === '帰庫');
   const startTime = startLog ? fmtTime(new Date(startLog.time)) : '-';
