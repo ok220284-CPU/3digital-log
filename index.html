@@ -5236,113 +5236,178 @@ init();</script>
 
     <div style="font-size:12px;color:var(--text);line-height:1.8;">
 
-      <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;">
-        <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">🚛 基本の流れ</div>
+      <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;border:1px solid var(--accent);">
+        <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">🚛 1日の流れ</div>
         <div style="color:var(--text-dim);">
-          ① ドライバー選択（画面中段）<br>
-          ② 出庫ボタン → オドメーター入力<br>
-          ③ 荷積・荷降・運転開始を繰り返す<br>
-          ④ 帰庫ボタン → オドメーター入力<br>
-          ⑤ 日報出力で送信
+          ① ドライバー選択<br>
+          ② 🔧 <b>日常点検</b>（法令義務）<br>
+          ③ 📋 <b>点呼</b>（アルコール・体調）<br>
+          ④ <b>出庫</b> → オドメーター入力<br>
+          ⑤ 荷積・運転・荷降・休憩を記録<br>
+          ⑥ <b>帰庫</b> → オドメーター入力<br>
+          ⑦ 📤 <b>日報出力</b>（電子署名・自動バックアップ）
         </div>
       </div>
 
       <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;">
-        <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">▼ 操作パネル（メイン）</div>
+        <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">▼ 操作パネル</div>
         <div style="color:var(--text-dim);">
-          <b>出庫</b> … 1日の運行開始。オドメーター入力あり<br>
-          <b>📋 点呼</b> … アルコール・健康・車両チェックを記録<br>
-          <b>📦 荷積</b> … 荷積地を選択/GPS自動取得<br>
-          <b>📥 荷降</b> … 荷降地を選択。実車→空車の確認あり<br>
-          <b>休憩</b> … 休憩開始を記録<br>
-          <b>運転開始</b> … 運転再開を記録。荷積後は自動で実車に<br>
-          <b>⏸ 待機</b> … 荷待ちなどの待機時間を記録<br>
-          <b>🛣 高速</b> … IC名と料金を記録<br>
-          <b>⛽ 給油</b> … リッター数と金額を記録<br>
-          <b>💧 洗車</b> … 洗車を記録<br>
-          <b>🔧 点検</b> … 点検を記録<br>
-          <b>帰庫</b> … 1日の運行終了。オドメーター入力あり
+          <b>出庫</b> … 運行開始。オドメーター入力<br>
+          <b>📋 点呼</b> … アルコール/睡眠/健康/車両<br>
+          <b>📦 荷積</b> … エリア選択＋GPS自動取得<br>
+          <b>🚛 運転</b> … 運転再開。荷積後は自動で実車<br>
+          <b>🛣 高速</b> … 区間・料金を記録<br>
+          <b>📥 荷降</b> … 荷降＋実車/空車確認<br>
+          <b>☕ 休憩 / ⏸ 待機</b> … 状態記録<br>
+          <b>⛽ 給油</b> … 給油量と金額<br>
+          <b>💧 洗車 / 🔧 点検</b> … 日常点検チェック<br>
+          <b>■ 帰庫</b> … 運行終了。オドメーター+150kmデフォルト
+        </div>
+      </div>
+
+      <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;">
+        <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">🔧 日常点検（必須）</div>
+        <div style="color:var(--text-dim);">
+          <b>点検ボタン</b>で13項目をチェック<br>
+          ⚡ <b>ワンタップ一括OK</b>で素早く完了<br>
+          要確認項目は個別に変更可能<br>
+          ※ 点検未実施だと日報出力できません
         </div>
       </div>
 
       <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;">
         <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">🔄 道路種別・積載状態</div>
         <div style="color:var(--text-dim);">
-          <b>道路種別</b> … 一般道 / 高速道 を切替<br>
-          <b>積載状態</b> … 空車 / 実車 を切替<br>
-          ※ 荷積→運転開始で自動的に実車に切替<br>
-          ※ 荷降後の確認で空車に切替可能
+          <b>道路</b> … 一般道 / 高速道 切替<br>
+          <b>積載</b> … 空車 / 実車 切替<br>
+          ※ 75km/h以上で高速道に自動切替<br>
+          ※ 荷積→運転で自動で実車
         </div>
       </div>
 
       <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;">
         <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">📍 GPS機能</div>
         <div style="color:var(--text-dim);">
-          <b>自動地名取得</b> … 荷積/荷降時にGPSで住所・施設名を自動入力<br>
-          <b>位置情報共有</b> … 管理者モードで各ドライバーの位置を確認可能<br>
-          ※ 事故やトラブル発生時の迅速な対応に活用
+          <b>自動地名取得</b> … 市区町村＋施設名を荷積/荷降で自動入力<br>
+          <b>階層型選択</b> … 大阪市/堺・南河内/北摂/泉州/神戸など<br>
+          <b>速度連動</b> … 速度から道路種別を自動判定<br>
+          <b>位置共有</b> … 管理者モードで現在位置確認
         </div>
       </div>
 
       <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;">
         <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">📤 日報出力・共有</div>
         <div style="color:var(--text-dim);">
-          <b>通常版</b> … 全ログ・給油/高速明細付きの詳細日報<br>
-          <b>簡易版</b> … LINE送信向きのコンパクト日報<br>
-          <b>走行距離</b> … オドメーター未入力時は手動入力も可能<br>
-          <b>送信方法</b> … 共有シート / メール / CSV / テキスト / コピー
+          <b>✍️ 電子署名</b> … 提出前に本人確認タップ<br>
+          <b>📑 PDF</b> … 正式書類形式（印刷/PDF保存）<br>
+          <b>📱 共有シート</b> … LINE/メール等<br>
+          <b>📊 CSV / 📄 テキスト</b> … データ出力<br>
+          <b>改ざん検知ハッシュ</b> … PDF末尾に記載
         </div>
       </div>
 
       <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;">
         <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">📊 分析・集計</div>
         <div style="color:var(--text-dim);">
-          <b>📊 集計</b> … 週間・月間の走行距離/給油/高速料金<br>
-          <b>⛽ 燃費評価</b> … 燃費をスコアリングして評価<br>
-          <b>📅 履歴</b> … 過去の運行ログを日付別に閲覧
+          <b>📊 集計</b> … 週間・月間の距離/給油/高速<br>
+          <b>⛽ 燃費評価</b> … 燃費比較＋違反集計<br>
+          <b>📅 履歴</b> … 最大400日分保存・日付検索
         </div>
       </div>
 
       <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;">
         <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">👁 管理者モード</div>
         <div style="color:var(--text-dim);">
-          全ドライバーの状況をリアルタイムで一覧表示<br>
-          <b>表示内容</b> … ステータス・積載・道路・走行距離・最終操作<br>
-          <b>📍 位置確認</b> … Google Mapsで位置を表示<br>
-          <b>🔄 最新に更新</b> … 手動リフレッシュ
+          全ドライバーの状況をリアルタイム表示<br>
+          <b>📍 位置確認</b> … Google Mapsで表示<br>
+          <b>📋 日報承認</b> … ワンタップで電子承認<br>
+          ※ 管理者名を最初に設定してください
         </div>
       </div>
 
-      <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;">
-        <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">⚙ 設定</div>
+      <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;border:1px solid var(--red);">
+        <div style="font-weight:700;color:var(--red);margin-bottom:4px;">⚠️ 事故・ヒヤリハット</div>
         <div style="color:var(--text-dim);">
-          <b>👤 ドライバー管理</b> … ドライバーの追加・編集・削除<br>
-          <b>🚛 車両台帳</b> … 車両情報の登録・車検期限管理<br>
-          <b>💾 バックアップ/復元</b> … 全データのJSON保存と復元<br>
-          <b>📋 運行予定</b> … 本日の運行予定を登録
+          <b>記録項目</b> … 種別/場所/状況/天候/対応<br>
+          <b>写真添付</b> … 複数枚（自動圧縮）<br>
+          <b>GPS自動取得</b> … 発生場所を一発入力<br>
+          <b>履歴</b> … 過去の記録を種別別に確認
         </div>
       </div>
 
       <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;">
-        <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">⚠ 安全アラート</div>
+        <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">⚙ 設定メニュー (その他)</div>
+        <div style="color:var(--text-dim);">
+          <b>👤 ドライバー管理</b> … 追加/編集/削除<br>
+          <b>🚛 車両台帳</b> … 車検・保険期限管理<br>
+          <b>💾 バックアップ/復元</b> … クラウド+JSON<br>
+          <b>🔒 改ざん検証</b> … ハッシュで本日データを検証<br>
+          <b>📋 運行予定</b> … 本日のToDo<br>
+          <b>⚠️ 事故・ヒヤリハット</b> … 記録/履歴
+        </div>
+      </div>
+
+      <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;">
+        <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">☁ データ保存</div>
+        <div style="color:var(--text-dim);">
+          <b>端末</b> … 最大400日（法令1年カバー）<br>
+          <b>クラウド</b> … 日報出力時に自動バックアップ<br>
+          <b>機種変更時</b> … クラウドから復元可能<br>
+          <b>JSONファイル</b> … 手動保存も可能
+        </div>
+      </div>
+
+      <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;border:1px solid #ffd54f;">
+        <div style="font-weight:700;color:#ffd54f;margin-bottom:4px;">⚠ 法令違反警告</div>
         <div style="color:var(--text-dim);">
           <b>連続運転</b> … 4時間超で警告<br>
-          <b>拘束時間</b> … 13時間超で警告<br>
+          <b>拘束時間</b> … 13時間超で警告（上限15時間）<br>
           <b>インターバル</b> … 前回帰庫から9時間未満で警告<br>
-          <b>実車帰庫</b> … 実車のまま帰庫で注意喚起
+          <b>実車帰庫</b> … 実車のまま帰庫で注意
         </div>
       </div>
 
       <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;">
-        <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">📋 ログ</div>
+        <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">📋 ログ操作</div>
         <div style="color:var(--text-dim);">
-          本日の全操作ログを時系列で表示<br>
-          各ログをタップすると編集・削除が可能
+          <b>タップ</b> … 編集画面（時刻・内容修正）<br>
+          <b>×ボタン</b> … ワンタップ削除<br>
+          <b>件数表示</b> … 現在のログ数
+        </div>
+      </div>
+
+      <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;">
+        <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">🔊 音声読み上げ</div>
+        <div style="color:var(--text-dim);">
+          各操作で読み上げ発声<br>
+          <b>行動系</b> … 「〜をします」<br>
+          <b>状態系</b> … 「高速道 / 一般道 / 実車 / 空車」
+        </div>
+      </div>
+
+      <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:12px;">
+        <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">🔄 更新ボタン</div>
+        <div style="color:var(--text-dim);">
+          ヘッダーの🔄で最新版にアップデート<br>
+          キャッシュクリア＋ハードリロード
+        </div>
+      </div>
+
+      <div style="background:var(--bg);border:1px solid var(--accent);border-radius:8px;padding:10px;margin-bottom:12px;">
+        <div style="font-weight:700;color:var(--accent);margin-bottom:4px;">🏛 法令準拠のポイント</div>
+        <div style="color:var(--text-dim);">
+          ✓ 保存期間 400日（法令1年+予備）<br>
+          ✓ ドライバー電子署名<br>
+          ✓ 運行管理者電子承認<br>
+          ✓ 改ざん検知（SHA-256ハッシュ）<br>
+          ✓ クラウド自動バックアップ<br>
+          ✓ 日常点検・点呼記録完備<br>
+          ※ 運用は各社・運輸支局の指示に従ってください
         </div>
       </div>
 
       <div style="text-align:center;color:var(--text-dim);font-size:10px;margin-top:8px;">
-        デジログ v6.1 | Firebase リアルタイム同期対応
+        デジログ v8.3 | 法令準拠完全版
       </div>
 
     </div>
