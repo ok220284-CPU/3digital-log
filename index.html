@@ -942,9 +942,17 @@ body {
     <h3>🔧 日常点検記録</h3>
     <div style="font-size:10px;color:var(--text-dim);margin-bottom:10px;">国土交通省 定期点検基準準拠</div>
 
+    <!-- ワンタップ一括チェック (最上部) -->
+    <button onclick="inspectionAllOK()" style="width:100%;background:var(--green);color:#000;border:none;padding:14px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:12px;box-shadow:0 2px 6px rgba(0,200,83,0.3);">
+      ⚡ ワンタップで全て異常なしにする
+    </button>
+    <div style="font-size:10px;color:var(--text-dim);text-align:center;margin-bottom:10px;">
+      ↑押した後に「記録」でOK / 下から個別に「要確認」に変更も可能
+    </div>
+
     <!-- 重要項目(手動チェック) -->
     <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:10px;">
-      <div style="font-weight:700;color:var(--accent);margin-bottom:8px;font-size:12px;">⚠️ 重要項目 (必須チェック)</div>
+      <div style="font-weight:700;color:var(--accent);margin-bottom:8px;font-size:12px;">⚠️ 重要項目</div>
       <div id="inspectionKeyItems"></div>
     </div>
 
@@ -952,13 +960,13 @@ body {
     <div style="background:var(--panel-2);border-radius:8px;padding:10px;margin-bottom:10px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <div style="font-weight:700;color:var(--accent);font-size:12px;">その他項目</div>
-        <button onclick="inspectionBulkOK()" style="background:var(--green);color:#000;border:none;padding:4px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-weight:700;">✓ 全て異常なし</button>
+        <button onclick="inspectionBulkOK()" style="background:var(--green);color:#000;border:none;padding:4px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-weight:700;">✓ 一括OK</button>
       </div>
       <div id="inspectionOtherItems"></div>
     </div>
 
     <!-- 備考 -->
-    <div class="chip-label">備考 (要確認項目の詳細など)</div>
+    <div class="chip-label">備考 (要確認項目の詳細など・任意)</div>
     <input type="text" id="inspectionNote" placeholder="任意(例: 左前タイヤ空気圧やや低下)">
 
     <div class="modal-btns" style="margin-top:12px;">
@@ -2619,6 +2627,13 @@ function inspectionBulkOK() {
   });
   renderInspectionItems();
   showAlert('✓ その他項目を一括チェック', 'info');
+}
+function inspectionAllOK() {
+  [...INSPECTION_KEY_ITEMS, ...INSPECTION_OTHER_ITEMS].forEach(item => {
+    inspectionState[item.id] = 'ok';
+  });
+  renderInspectionItems();
+  showAlert('✓ 全項目を異常なしに設定', 'info');
 }
 function saveInspection() {
   // 重要項目は全て選択必須
