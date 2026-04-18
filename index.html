@@ -2334,19 +2334,18 @@ function updateTenkoChips() {
   document.querySelectorAll('#tenkoModal .chip').forEach(c => c.classList.remove('selected'));
   document.querySelectorAll('#tenkoModal .chip').forEach(c => {
     const txt = c.textContent.trim();
+    const parent = c.parentElement;
     if (txt === tenkoSelection.health || txt === tenkoSelection.check) c.classList.add('selected');
-    // アルコール
-    if (tenkoSelection.alcohol === '0.00' && txt === '0.00') c.classList.add('selected');
-    if (tenkoSelection.alcohol === '0.01' && txt === '0.01') c.classList.add('selected');
-    if (tenkoSelection.alcohol === '0.02' && txt === '0.02') c.classList.add('selected');
-    if (tenkoSelection.alcohol === 'custom' && txt === '手動入力') c.classList.add('selected');
-    // 睡眠 (5時間〜9時間、手動入力)
-    const sleepMap = {'5':'5時間', '6':'6時間', '7':'7時間', '8':'8時間', '9':'9時間', 'custom':'手動入力'};
-    if (tenkoSelection.sleep && sleepMap[tenkoSelection.sleep] === txt) {
-      // 手動入力が複数存在するので、親要素で判別
-      const parent = c.parentElement;
-      if (tenkoSelection.sleep === 'custom' && parent.id === 'tenkoSleepChips') c.classList.add('selected');
-      else if (tenkoSelection.sleep !== 'custom') c.classList.add('selected');
+    // アルコール(親要素で判別)
+    if (parent.id === 'tenkoAlcoholChips') {
+      if (tenkoSelection.alcohol === '0.00' && txt === '0.00') c.classList.add('selected');
+      if (tenkoSelection.alcohol === '0.01' && txt === '0.01') c.classList.add('selected');
+      if (tenkoSelection.alcohol === '0.02' && txt === '0.02') c.classList.add('selected');
+      if (tenkoSelection.alcohol === 'custom' && txt === '手動') c.classList.add('selected');
+    }
+    // 睡眠(3-10時間、親要素で判別)
+    if (parent.id === 'tenkoSleepChips' && tenkoSelection.sleep && txt === tenkoSelection.sleep) {
+      c.classList.add('selected');
     }
   });
 }
