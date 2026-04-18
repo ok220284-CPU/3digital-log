@@ -1836,11 +1836,11 @@ function fetchGeoLocation(callback) {
           if (a.order === 10 || desc.includes('行政区')) ward = a.name;
         });
       }
-      if (!pref) pref = data.principalSubdivision || '';
       if (!city) city = data.city || '';
       if (!ward) ward = data.locality || '';
-      let address = pref;
-      if (city && city !== pref) address += city;
+      // 都道府県は省略、市区町村のみ表示
+      let address = '';
+      if (city) address += city;
       if (ward && ward !== city) address += ward;
       const opQ = '[out:json][timeout:5];(node["office"](around:200,' + lat + ',' + lng + ');way["office"](around:200,' + lat + ',' + lng + ');node["shop"](around:150,' + lat + ',' + lng + ');node["building"="warehouse"](around:200,' + lat + ',' + lng + ');way["building"="warehouse"](around:200,' + lat + ',' + lng + ');node["amenity"](around:100,' + lat + ',' + lng + ');way["amenity"](around:100,' + lat + ',' + lng + '););out tags 3;';
       fetch('https://overpass-api.de/api/interpreter', {
