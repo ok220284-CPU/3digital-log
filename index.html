@@ -1697,19 +1697,19 @@ function logEvent(label, newStatus, extra = {}) {
   // 読み上げ処理(シンプル化)
   if (extra.skipSpeak) {
     // 高速料金
-    speak('高速道です');
+    speak('高速道');
   } else {
     let speakText = '';
     const b = baseAction;
-    if (b === '出庫') speakText = '出庫します';
-    else if (b === '帰庫') speakText = '帰庫します';
-    else if (b === '荷積') speakText = '荷積みです';
-    else if (b === '荷降') speakText = '荷降しです';
-    else if (b === '運転開始') speakText = '運転します';
-    else if (b === '休憩') speakText = '休憩です';
-    else if (b === '待機') speakText = '待機です';
-    else if (b === '洗車') speakText = '洗車です';
-    else if (b === '点検') speakText = '点検です';
+    if (b === '出庫') speakText = '出庫';
+    else if (b === '帰庫') speakText = '帰庫';
+    else if (b === '荷積') speakText = '荷積み';
+    else if (b === '荷降') speakText = '荷降し';
+    else if (b === '運転開始') speakText = '運転';
+    else if (b === '休憩') speakText = '休憩';
+    else if (b === '待機') speakText = '待機';
+    else if (b === '洗車') speakText = '洗車';
+    else if (b === '点検') speakText = '点検';
     else if (extra.fuelLiter) speakText = `給油 ${extra.fuelLiter}リットル`;
     else if (label.startsWith('乗務前点呼')) speakText = '乗務前点呼完了';
     else if (label.startsWith('乗務後点呼')) speakText = '乗務後点呼完了';
@@ -1719,7 +1719,7 @@ function logEvent(label, newStatus, extra = {}) {
   showAlert(`✓ ${label}を記録`, 'info');
   if (autoLoadChanged) {
     setTimeout(() => {
-      speak(`${autoLoadChanged}です`);
+      speak(`${autoLoadChanged}`);
       showAlert(`自動: ${autoLoadChanged}に切替`, 'info');
     }, 1200);
   }
@@ -1736,7 +1736,7 @@ function confirmUnload(stillLoaded) {
     state.load = '空車';
     updateToggleUI();
     saveState();
-    speak('空車です');
+    speak('空車');
     showAlert('自動: 次のイベントから空車', 'info');
   }
 }
@@ -1747,14 +1747,14 @@ function confirmUnloadSpeak(stillLoaded) {
     state.load = '実車';
     updateToggleUI();
     saveState();
-    speak('実車です');
+    speak('実車');
     showAlert('実車のまま継続', 'info');
   } else {
     // 空車ボタン: 空車に切替
     state.load = '空車';
     updateToggleUI();
     saveState();
-    speak('空車です');
+    speak('空車');
     showAlert('空車に切替', 'info');
   }
 }
@@ -1828,7 +1828,7 @@ document.querySelectorAll('.toggle-opt').forEach(opt => {
       logs.push(entry);
       saveLogs();
       renderLogs();
-      const speakText = `${val}です`;
+      const speakText = `${val}`;
       speak(speakText);
     }
   });
@@ -3261,7 +3261,7 @@ function onGpsSuccess(pos) {
         updateToggleUI();
         saveState();
         showAlert('🛣 高速道路を検出（自動切替）', 'info');
-        speak('高速道路です');
+        speak('高速道');
       }
     } else if (gpsCurrentSpeed < 40) {
       autoRoadLowCount++;
@@ -3271,7 +3271,7 @@ function onGpsSuccess(pos) {
         updateToggleUI();
         saveState();
         showAlert('🛣 一般道に切替（自動）', 'info');
-        speak('一般道です');
+        speak('一般道');
         // 高速料金入力を促す
         setTimeout(() => openTollModal(), 1500);
       }
