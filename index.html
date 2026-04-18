@@ -1296,7 +1296,6 @@ const STORAGE = {
   unloadSites: 'dt_unload_sites',
   lastOdometer: 'dt_last_odometer',
   lastEnd: 'dt_last_end',
-  tenko: 'dt_tenko',
   vehicles: 'dt_vehicles',
   currentVehicle: 'dt_current_vehicle',
   plans: 'dt_plans',
@@ -1728,17 +1727,6 @@ function logEvent(label, newStatus, extra = {}) {
     setTimeout(() => {
       document.getElementById('unloadConfirmModal').classList.add('show');
     }, 800);
-  }
-}
-function confirmUnload(stillLoaded) {
-  document.getElementById('unloadConfirmModal').classList.remove('show');
-  if (!stillLoaded) {
-    // 荷降イベント自身は実車のまま。次のイベントから空車になるようstateだけ変更
-    state.load = '空車';
-    updateToggleUI();
-    saveState();
-    speak('空車です');
-    showAlert('自動: 次のイベントから空車', 'info');
   }
 }
 function confirmUnloadSpeak(stillLoaded) {
@@ -3806,39 +3794,6 @@ function deleteLog() {
   showAlert('✓ 削除しました', 'info');
 }
 
-function showDeleteConfirm(idx) {
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay show';
-  overlay.innerHTML = `<div class="modal" style="max-width:320px;text-align:center;">
-    <h3>▼ 削除確認</h3>
-    <div style="font-size:14px;color:var(--white);margin-bottom:16px;">このログを削除しますか？</div>
-    <div class="modal-btns">
-      <button class="modal-btn" id="delCancel">キャンセル</button>
-      <button class="modal-btn danger" id="delConfirm">削除する</button>
-    </div>
-  </div>`;
-  document.body.appendChild(overlay);
-  overlay.querySelector('#delCancel').onclick = () => overlay.remove();
-  overlay.querySelector('#delConfirm').onclick = () => {
-    const l = logs[idx];
-    if (l.fuelLiter !== undefined) {
-      state.fuels = state.fuels.filter(f => !(f.liter === l.fuelLiter && f.yen === l.fuelYen));
-    }
-    if (l.tollYen !== undefined) {
-      state.tolls = state.tolls.filter(t => !(t.yen === l.tollYen && t.from === l.tollFrom));
-    }
-    const base = l.baseAction || l.label;
-    if (base === '出庫') state.odoStart = null;
-    if (base === '帰庫') state.odoEnd = null;
-    logs.splice(idx, 1);
-    saveLogs();
-    saveState();
-    updateSummaryUI();
-    renderLogs();
-    overlay.remove();
-    showAlert('✓ 削除しました', 'info');
-  };
-}
 function openDriverModal() {
   updateVehicleAssignSelect();
   renderDriverList();
