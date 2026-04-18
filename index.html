@@ -1507,10 +1507,47 @@ function archiveLogs(date, logsToArchive) {
   const saved = localStorage.getItem(STORAGE.history);
   const hist = saved ? JSON.parse(saved) : {};
   hist[date] = logsToArchive;
-  const keys = Object.keys(hist).sort().reverse().slice(0, 30);
+  // 法令保存期間(1年)+予備40日 = 400日保存
+  const keys = Object.keys(hist).sort().reverse().slice(0, 400);
   const trimmed = {};
   keys.forEach(k => trimmed[k] = hist[k]);
-  localStorage.setItem(STORAGE.history, JSON.stringify(trimmed));
+  // 容量チェック (5MB上限の90%超えたら古いものから圧縮)
+  let json = JSON.stringify(trimmed);
+  if (json.length > 4.5 * 1024 * 1024) {
+    // 90日以前のログは要約形式に圧縮
+    const cutoff = Date.now() - 90 * 86400000;
+    keys.forEach(k => {
+      const dt = new Date(k).getTime();
+      if (dt < cutoff && Array.isArray(trimmed[k])) {
+        // 重要イベント(出庫/帰庫/給油/高速/点検/点呼)のみ保持
+        trimmed[k] = trimmed[k].filter(l => {
+          const b = l.baseAction || l.label;
+          return ['出庫', '帰庫'].includes(b) || l.fuelLiter || l.tollYen || l.tenkoData || l.inspectionData;
+        });
+      }
+    });
+    json = JSON.stringify(trimmed);
+  }
+  try {
+    localStorage.setItem(STORAGE.history, json);
+  } catch(e) {
+    // 容量オーバー時は警告
+    showAlert('⚠️ ストレージ容量が限界です。バックアップして古いデータを削除してください', 'warn');
+  }
+}
+// ストレージ使用状況を取得
+function getStorageStats() {
+  const hist = localStorage.getItem(STORAGE.history);
+  const histSize = hist ? hist.length : 0;
+  const days = hist ? Object.keys(JSON.parse(hist)).length : 0;
+  const totalSize = JSON.stringify(localStorage).length;
+  return {
+    histDays: days,
+    histSizeKB: (histSize / 1024).toFixed(1),
+    totalSizeKB: (totalSize / 1024).toFixed(1),
+    limitMB: 5,
+    usagePercent: ((totalSize / (5 * 1024 * 1024)) * 100).toFixed(1)
+  };
 }
 function todayKey() {
   const d = new Date();
@@ -4506,23 +4543,57 @@ function copyExport() {
   showAlert('✓ コピーしました', 'info');
 }
 function openHistoryModal() {
+  renderHistoryList();
+  document.getElementById('historyModal').classList.add('show');
+}
+function renderHistoryList(filterText = '') {
   const saved = localStorage.getItem(STORAGE.history);
   const hist = saved ? JSON.parse(saved) : {};
   const list = document.getElementById('historyList');
   const keys = Object.keys(hist).sort().reverse();
+  // ストレージ統計を先頭に表示
+  const stats = getStorageStats();
+  const usage = parseFloat(stats.usagePercent);
+  const usageColor = usage > 80 ? 'var(--red)' : usage > 60 ? '#ffd54f' : 'var(--green)';
+  let header = `<div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:10px;font-size:11px;">
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+      <span style="color:var(--text-dim);">📅 保存日数:</span>
+      <span style="color:var(--white);font-weight:700;">${stats.histDays}日 / 最大400日</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+      <span style="color:var(--text-dim);">💾 使用容量:</span>
+      <span style="color:${usageColor};font-weight:700;">${stats.totalSizeKB} KB (${stats.usagePercent}%)</span>
+    </div>
+    <div style="height:6px;background:var(--panel);border-radius:3px;overflow:hidden;margin-top:4px;">
+      <div style="height:100%;width:${Math.min(100,usage)}%;background:${usageColor};"></div>
+    </div>
+  </div>
+  <input type="text" id="historySearchInput" placeholder="日付で検索 (例: 2026-04)" style="margin-bottom:10px;" oninput="renderHistoryList(this.value)" value="${filterText}">`;
   if (keys.length === 0) {
-    list.innerHTML = '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:20px;">履歴なし</div>';
-  } else {
-    list.innerHTML = keys.map(k => {
-      const dayLogs = hist[k];
-      const myLogs = dayLogs.filter(l => l.driver === currentDriverId);
-      return `<div style="padding:10px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;">
-        <div style="font-family:var(--mono);font-size:12px;color:var(--accent);">${k}</div>
-        <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">${myLogs.length} events</div>
-      </div>`;
-    }).join('');
+    list.innerHTML = header + '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:20px;">履歴なし</div>';
+    return;
   }
-  document.getElementById('historyModal').classList.add('show');
+  const filtered = filterText ? keys.filter(k => k.includes(filterText)) : keys;
+  if (filtered.length === 0) {
+    list.innerHTML = header + '<div style="font-size:12px;color:var(--text-dim);text-align:center;padding:20px;">該当なし</div>';
+    return;
+  }
+  list.innerHTML = header + filtered.map(k => {
+    const dayLogs = hist[k];
+    const myLogs = dayLogs.filter(l => l.driver === currentDriverId);
+    const hasInspection = myLogs.some(l => l.inspectionData);
+    const hasTenko = myLogs.some(l => l.tenkoData);
+    return `<div style="padding:10px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-family:var(--mono);font-size:12px;color:var(--accent);">${k}</div>
+        <div style="display:flex;gap:4px;">
+          ${hasInspection ? '<span style="background:var(--green);color:#000;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:700;">点検</span>' : ''}
+          ${hasTenko ? '<span style="background:var(--accent);color:#000;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:700;">点呼</span>' : ''}
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">${myLogs.length} events</div>
+    </div>`;
+  }).join('');
 }
 function closeHistoryModal() {
   document.getElementById('historyModal').classList.remove('show');
