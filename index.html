@@ -1635,7 +1635,8 @@ let state = {
   odoEnd: null,
   manualDistance: null,
   pendingLoadChange: null,
-  approval: null
+  approval: null,
+  driverSignature: null
 };
 let logs = [];
 let drivers = [];
@@ -4525,6 +4526,15 @@ function exportLog() {
     showInspectionRequired();
     return;
   }
+  // 電子署名がまだなら署名モーダルを出す
+  if (!state.driverSignature || state.driverSignature.date !== todayKey()) {
+    showDriverSignatureModal();
+    return;
+  }
+  // 署名済みなら日報モーダルを開く
+  openSendModalAfterSign();
+}
+function openSendModalAfterSign() {
   currentReportMode = 'simple';
   updateReportPreview();
   currentReportCSV = buildCSV();
@@ -4533,7 +4543,7 @@ function exportLog() {
   hint.textContent = driver.email ? `メール宛先: ${driver.email}` : 'メール宛先未登録(ドライバー設定で登録可)';
   updateManualDistanceUI();
   document.getElementById('sendModal').classList.add('show');
-  // 日報出力時に自動でクラウドバックアップ+ハッシュ保存
+  // 自動バックアップ+ハッシュ保存
   autoBackupToCloud();
   saveDailyHash().then(hashInfo => {
     if (hashInfo) {
@@ -4542,6 +4552,57 @@ function exportLog() {
       if (hashEl) hashEl.textContent = hashInfo.shortHash;
     }
   });
+}
+function showDriverSignatureModal() {
+  const driver = drivers.find(d => d.id === currentDriverId);
+  if (!driver) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay show';
+  overlay.style.zIndex = '260';
+  overlay.innerHTML = `<div class="modal" style="max-width:340px;text-align:center;">
+    <div style="font-size:42px;margin-bottom:8px;">✍️</div>
+    <h3 style="color:var(--accent);">電子署名</h3>
+    <div style="font-size:12px;color:var(--white);margin:14px 0;line-height:1.7;">
+      本日の日報を提出します。<br>
+      以下の内容で間違いないですか？
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:12px;text-align:left;font-size:12px;">
+      <div style="color:var(--text-dim);font-size:10px;margin-bottom:4px;">氏名</div>
+      <div style="color:var(--accent);font-weight:700;font-size:16px;">${driver.name}</div>
+      <div style="color:var(--text-dim);font-size:10px;margin-top:8px;margin-bottom:4px;">車両</div>
+      <div style="color:var(--text);">${(getActiveVehicle()||{}).vehicle ? (getActiveVehicle().vehicle.number||'') : (driver.vehicle||'-')}</div>
+      <div style="color:var(--text-dim);font-size:10px;margin-top:8px;margin-bottom:4px;">日付</div>
+      <div style="color:var(--text);">${todayKey()}</div>
+    </div>
+    <div style="font-size:10px;color:var(--text-dim);margin-bottom:12px;line-height:1.5;">
+      ※ 下のボタンをタップすると<br>電子署名として記録されます
+    </div>
+    <div class="modal-btns" style="flex-direction:column;gap:8px;">
+      <button class="modal-btn primary" id="sigConfirm" style="background:var(--accent);color:#000;font-weight:700;font-size:14px;padding:12px;">✍️ 私が記入しました (${driver.name})</button>
+      <button class="modal-btn" id="sigCancel">キャンセル</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#sigCancel').onclick = () => overlay.remove();
+  overlay.querySelector('#sigConfirm').onclick = async () => {
+    const hashInfo = await calcDailyHash();
+    const signature = {
+      driverName: driver.name,
+      driverId: currentDriverId,
+      signedAt: new Date().toISOString(),
+      date: todayKey(),
+      dataHash: hashInfo ? hashInfo.hash : null
+    };
+    state.driverSignature = signature;
+    saveState();
+    // Firebaseにも保存
+    if (fbSyncEnabled) {
+      fbDb.ref('signatures/' + currentDriverId + '/' + todayKey()).set(signature).catch(err => console.warn(err));
+    }
+    overlay.remove();
+    showAlert(`✓ ${driver.name}さんの署名を記録`, 'info');
+    openSendModalAfterSign();
+  };
 }
 function showInspectionRequired() {
   const overlay = document.createElement('div');
@@ -4784,7 +4845,7 @@ function downloadPDF() {
   ${fuelRows ? `<h2>給油明細</h2><table><thead><tr><th class="time-col">時刻</th><th>給油量</th><th>金額</th></tr></thead><tbody>${fuelRows}</tbody></table>` : ''}
   ${tollRows ? `<h2>高速料金明細</h2><table><thead><tr><th class="time-col">時刻</th><th>区間</th><th>金額</th></tr></thead><tbody>${tollRows}</tbody></table>` : ''}
   <div class="sign-area">
-    <div class="sign-box"><div class="label">運転者印</div><div style="font-size:9pt;margin-top:8px;">${driver.name}</div></div>
+    <div class="sign-box"><div class="label">運転者印</div>${state.driverSignature && state.driverSignature.date === todayKey() ? `<div style="font-size:9pt;color:#2e7d32;font-weight:bold;margin-top:8px;">✓ ${state.driverSignature.driverName}</div><div style="font-size:7pt;color:#555;">${new Date(state.driverSignature.signedAt).toLocaleString('ja-JP')}</div>` : `<div style="font-size:9pt;margin-top:8px;">${driver.name}</div>`}</div>
     <div class="sign-box"><div class="label">運行管理者印</div>${state.approval && state.approval.date === todayKey() ? `<div style="font-size:9pt;color:#2e7d32;font-weight:bold;margin-top:8px;">✓ ${state.approval.managerName}</div><div style="font-size:7pt;color:#555;">${new Date(state.approval.approvedAt).toLocaleString('ja-JP')}</div>` : ''}</div>
   </div>
   <div class="footer">
