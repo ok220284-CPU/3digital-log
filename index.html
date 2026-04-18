@@ -1062,6 +1062,12 @@ body {
     <div class="chip-row" id="odoPlaceChips"></div>
     <input type="text" id="odoPlace" placeholder="地点名（例: 堺営業所）">
     <input type="number" id="odoVal" placeholder="オドメーター値 (km)" inputmode="numeric">
+    <div id="odoAdjustBtns" style="display:none;gap:6px;margin:8px 0;flex-wrap:wrap;">
+      <button class="modal-btn" style="flex:1;min-width:60px;font-size:12px;padding:6px;" onclick="adjustOdo(-10)">-10km</button>
+      <button class="modal-btn" style="flex:1;min-width:60px;font-size:12px;padding:6px;" onclick="adjustOdo(-5)">-5km</button>
+      <button class="modal-btn" style="flex:1;min-width:60px;font-size:12px;padding:6px;" onclick="adjustOdo(5)">+5km</button>
+      <button class="modal-btn" style="flex:1;min-width:60px;font-size:12px;padding:6px;" onclick="adjustOdo(10)">+10km</button>
+    </div>
     <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;" id="odoHint"></div>
     <div class="modal-btns">
       <button class="modal-btn" onclick="closeOdoModal()">キャンセル</button>
@@ -2136,7 +2142,8 @@ function openOdoModal(type) {
       document.getElementById('odoPlace').value = places[0].name;
     }
   } else if (type === '帰庫' && state.odoStart) {
-    hint.textContent = `本日出庫時: ${state.odoStart} km`;
+    input.value = state.odoStart + 150;
+    hint.textContent = `本日出庫時: ${state.odoStart} km (+150km デフォルト)`;
     const places = getOdoPlaces();
     if (places.length > 0) {
       document.getElementById('odoPlace').value = places[0].name;
@@ -2144,7 +2151,14 @@ function openOdoModal(type) {
   } else {
     hint.textContent = '';
   }
+  // 帰庫時のみ±ボタンを表示
+  document.getElementById('odoAdjustBtns').style.display = (type === '帰庫') ? 'flex' : 'none';
   document.getElementById('odoModal').classList.add('show');
+}
+function adjustOdo(delta) {
+  const input = document.getElementById('odoVal');
+  const current = parseInt(input.value) || 0;
+  input.value = current + delta;
 }
 function closeOdoModal() {
   document.getElementById('odoModal').classList.remove('show');
