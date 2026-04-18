@@ -1086,6 +1086,7 @@ body {
     <div style="display:flex;flex-direction:column;gap:8px;">
       <button class="modal-btn primary" onclick="sendByShare()">📱 共有シート(LINE/メール他)</button>
       <button class="modal-btn primary" onclick="sendByMail()">📧 メール送信</button>
+      <button class="modal-btn primary" onclick="downloadPDF()" style="background:#E53935;color:#fff;">📑 PDF日報を印刷/保存</button>
       <button class="modal-btn primary" onclick="downloadCSV()">📊 CSVダウンロード</button>
       <button class="modal-btn primary" onclick="downloadTxt()">📄 テキスト保存</button>
       <button class="modal-btn" onclick="copyReport()">📋 コピー</button>
@@ -4156,6 +4157,124 @@ function downloadTxt() {
   URL.revokeObjectURL(url);
   closeSendModal();
   showAlert('✓ テキスト保存', 'info');
+}
+function downloadPDF() {
+  const driver = drivers.find(d => d.id === currentDriverId);
+  if (!driver) { showAlert('ドライバーが未選択', 'warn'); return; }
+  const filtered = logs.filter(l => l.driver === currentDriverId).slice().sort((a,b) => a.time - b.time);
+  const myFuels = state.fuels.filter(f => f.driver === currentDriverId);
+  const myTolls = state.tolls.filter(t => t.driver === currentDriverId);
+  const totalL = myFuels.reduce((s, f) => s + (parseFloat(f.liter) || 0), 0);
+  const totalFY = myFuels.reduce((s, f) => s + (parseInt(f.yen) || 0), 0);
+  const totalTY = myTolls.reduce((s, t) => s + (parseInt(t.yen) || 0), 0);
+  const active = getActiveVehicle();
+  const vehicle = active ? active.vehicle.number + (active.vehicle.model ? ' / ' + active.vehicle.model : '') : (driver.vehicle || '-');
+  let distText = '-';
+  if (state.odoStart && state.odoEnd) distText = `${state.odoEnd - state.odoStart} km (${state.odoStart} → ${state.odoEnd})`;
+  else if (state.manualDistance) distText = `${state.manualDistance} km (手動)`;
+  const effText = (totalL > 0 && state.odoStart && state.odoEnd) ? `${((state.odoEnd - state.odoStart) / totalL).toFixed(2)} km/L` : '-';
+  const startLog = filtered.find(l => l.label === '出庫' || l.baseAction === '出庫');
+  const endLog = filtered.slice().reverse().find(l => l.label === '帰庫' || l.baseAction === '帰庫');
+  const startTime = startLog ? fmtTime(new Date(startLog.time)) : '-';
+  const endTime = endLog ? fmtTime(new Date(endLog.time)) : '-';
+  const dutyText = (startLog && endLog) ? fmtDuration(endLog.time - startLog.time) : '-';
+
+  // ログ行を生成
+  let logRows = '';
+  filtered.forEach(l => {
+    const t = fmtTime(new Date(l.time));
+    let note = '';
+    if (l.fuelLiter) note = `${l.fuelLiter}L${l.fuelYen ? ' ¥' + l.fuelYen.toLocaleString() : ''}`;
+    else if (l.tollYen) note = `${l.tollFrom||''}→${l.tollTo||''} ¥${l.tollYen.toLocaleString()}`;
+    else if (l.odometer) note = `${l.odometer}km`;
+    logRows += `<tr><td>${t}</td><td>${l.label}</td><td>${l.road}</td><td>${l.load}</td><td>${note}</td></tr>`;
+  });
+
+  // 給油明細
+  let fuelRows = '';
+  myFuels.forEach(f => {
+    const t = fmtTime(new Date(f.time));
+    fuelRows += `<tr><td>${t}</td><td>${f.liter} L</td><td>${f.yen ? '¥' + f.yen.toLocaleString() : '-'}</td></tr>`;
+  });
+
+  // 高速明細
+  let tollRows = '';
+  myTolls.forEach(t => {
+    const time = fmtTime(new Date(t.time));
+    tollRows += `<tr><td>${time}</td><td>${t.from||'?'} → ${t.to||'?'}</td><td>¥${t.yen.toLocaleString()}</td></tr>`;
+  });
+
+  const html = `<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><title>運転日報 ${todayKey()} ${driver.name}</title>
+<style>
+  @page { size: A4; margin: 15mm; }
+  * { box-sizing: border-box; font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif; }
+  body { margin: 0; padding: 0; color: #000; font-size: 11pt; line-height: 1.5; }
+  h1 { text-align: center; border-bottom: 3px double #000; padding-bottom: 6px; margin: 0 0 12px 0; font-size: 18pt; }
+  .header-info { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; margin-bottom: 14px; font-size: 10pt; }
+  .header-info div { border-bottom: 1px solid #999; padding: 3px 4px; }
+  .header-info b { display: inline-block; width: 6em; color: #333; }
+  .summary { background: #f5f5f5; border: 1px solid #666; padding: 10px; margin-bottom: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; font-size: 10pt; }
+  .summary b { color: #333; }
+  h2 { font-size: 12pt; background: #333; color: #fff; padding: 3px 8px; margin: 14px 0 6px; border-radius: 2px; }
+  table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+  th, td { border: 1px solid #888; padding: 3px 6px; text-align: left; vertical-align: top; }
+  th { background: #e0e0e0; font-weight: bold; }
+  tr:nth-child(even) td { background: #fafafa; }
+  .time-col { width: 48px; }
+  .road-col, .load-col { width: 46px; text-align: center; }
+  .sign-area { margin-top: 20px; display: flex; justify-content: flex-end; gap: 30px; font-size: 10pt; }
+  .sign-box { border: 1px solid #333; padding: 14px 20px 6px; min-width: 100px; text-align: center; }
+  .sign-box .label { font-size: 9pt; color: #555; margin-bottom: 4px; }
+  .footer { margin-top: 14px; font-size: 8pt; color: #666; text-align: right; }
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+  .noprint { text-align: center; padding: 20px; background: #fff8e1; border: 2px solid #ffa726; margin-bottom: 20px; border-radius: 6px; }
+  .noprint button { padding: 10px 24px; font-size: 14pt; background: #1976d2; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+  @media print { .noprint { display: none; } }
+</style></head>
+<body>
+  <div class="noprint">
+    <p style="margin:0 0 10px;font-size:12pt;">📑 <b>印刷ダイアログ</b>を開きます。<br>プリンターを <b>「PDFに保存」</b> に選ぶとPDFとして保存できます。</p>
+    <button onclick="window.print()">🖨 印刷 / PDF保存</button>
+  </div>
+  <h1>運 転 日 報</h1>
+  <div class="header-info">
+    <div><b>日付</b>${todayKey()}</div>
+    <div><b>氏名</b>${driver.name}</div>
+    <div><b>車両</b>${vehicle}</div>
+    <div><b>出勤/退勤</b>${startTime} 〜 ${endTime}</div>
+  </div>
+  <div class="summary">
+    <div><b>拘束時間:</b> ${dutyText}</div>
+    <div><b>走行距離:</b> ${distText}</div>
+    <div><b>給油:</b> ${totalL.toFixed(1)} L ${totalFY > 0 ? '/ ¥' + totalFY.toLocaleString() : ''}</div>
+    <div><b>燃費:</b> ${effText}</div>
+    <div><b>高速料金:</b> ¥${totalTY.toLocaleString()} (${myTolls.length}回)</div>
+    <div><b>道路種別:</b> 記録参照</div>
+  </div>
+  <h2>運行ログ</h2>
+  <table>
+    <thead><tr><th class="time-col">時刻</th><th>イベント</th><th class="road-col">道路</th><th class="load-col">積載</th><th>備考</th></tr></thead>
+    <tbody>${logRows || '<tr><td colspan="5" style="text-align:center;color:#999;">記録なし</td></tr>'}</tbody>
+  </table>
+  ${fuelRows ? `<h2>給油明細</h2><table><thead><tr><th class="time-col">時刻</th><th>給油量</th><th>金額</th></tr></thead><tbody>${fuelRows}</tbody></table>` : ''}
+  ${tollRows ? `<h2>高速料金明細</h2><table><thead><tr><th class="time-col">時刻</th><th>区間</th><th>金額</th></tr></thead><tbody>${tollRows}</tbody></table>` : ''}
+  <div class="sign-area">
+    <div class="sign-box"><div class="label">運転者印</div></div>
+    <div class="sign-box"><div class="label">運行管理者印</div></div>
+  </div>
+  <div class="footer">デジログ 出力: ${new Date().toLocaleString('ja-JP')}</div>
+  <script>setTimeout(() => window.print(), 500);<\/script>
+</body></html>`;
+
+  const w = window.open('', '_blank');
+  if (!w) { showAlert('ポップアップブロックを解除してください', 'warn'); return; }
+  w.document.write(html);
+  w.document.close();
+  closeSendModal();
+  showAlert('✓ PDF印刷画面を開きました', 'info');
 }
 function copyReport() {
   if (navigator.clipboard) {
