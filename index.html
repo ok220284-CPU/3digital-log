@@ -1711,8 +1711,8 @@ function logEvent(label, newStatus, extra = {}) {
     else if (b === '洗車') speakText = '洗車をします';
     else if (b === '点検') speakText = '点検をします';
     else if (extra.fuelLiter) speakText = `給油をします ${extra.fuelLiter}リットル`;
-    else if (label.startsWith('乗務前点呼')) speakText = '乗務前点呼完了';
-    else if (label.startsWith('乗務後点呼')) speakText = '乗務後点呼完了';
+    else if (label.startsWith('乗務前点呼')) speakText = '点呼完了';
+    else if (label.startsWith('乗務後点呼')) speakText = '点呼完了';
     else speakText = label;
     speak(speakText);
   }
