@@ -691,6 +691,7 @@ body {
       <button class="modal-btn primary" onclick="closeSettingsModal(); openDriverModal();">👤 ドライバー管理</button>
       <button class="modal-btn primary" onclick="closeSettingsModal(); openVehicleModal();">🚛 車両台帳</button>
       <button class="modal-btn primary" onclick="closeSettingsModal(); openBackupModal();">💾 バックアップ/復元</button>
+      <button class="modal-btn primary" onclick="closeSettingsModal(); verifyDailyHash();" style="background:#7B1FA2;">🔒 本日の改ざん検証</button>
       <button class="modal-btn primary" onclick="closeSettingsModal(); document.getElementById('helpModal').classList.add('show');">📖 使い方ガイド</button>
       <button class="modal-btn danger" onclick="closeSettingsModal(); resetToday();">🗑 本日リセット</button>
       <button class="modal-btn" onclick="closeSettingsModal()">閉じる</button>
@@ -1410,6 +1411,103 @@ function autoBackupToCloud() {
     console.warn('自動バックアップ失敗:', err);
   });
 }
+// ===== 改ざん検知ハッシュ =====
+async function calcDailyHash() {
+  // 本日の運行データから決定論的なハッシュを計算
+  const driver = drivers.find(d => d.id === currentDriverId);
+  if (!driver) return null;
+  const filtered = logs.filter(l => l.driver === currentDriverId)
+    .slice()
+    .sort((a,b) => a.time - b.time)
+    .map(l => ({
+      time: l.time,
+      label: l.label,
+      road: l.road,
+      load: l.load,
+      odometer: l.odometer || null,
+      fuelLiter: l.fuelLiter || null,
+      fuelYen: l.fuelYen || null,
+      tollYen: l.tollYen || null,
+      tollFrom: l.tollFrom || null,
+      tollTo: l.tollTo || null
+    }));
+  const data = {
+    date: todayKey(),
+    driverId: currentDriverId,
+    driverName: driver.name,
+    vehicle: driver.vehicle || '',
+    odoStart: state.odoStart,
+    odoEnd: state.odoEnd,
+    logs: filtered
+  };
+  const json = JSON.stringify(data);
+  const encoder = new TextEncoder();
+  const buf = encoder.encode(json);
+  const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+  const hashArr = Array.from(new Uint8Array(hashBuf));
+  const hashHex = hashArr.map(b => b.toString(16).padStart(2, '0')).join('');
+  return {
+    hash: hashHex,
+    shortHash: hashHex.substring(0, 16),
+    dataJson: json,
+    generatedAt: new Date().toISOString()
+  };
+}
+async function saveDailyHash() {
+  if (!fbSyncEnabled || !currentDriverId) return null;
+  const hashInfo = await calcDailyHash();
+  if (!hashInfo) return null;
+  const record = {
+    hash: hashInfo.hash,
+    generatedAt: hashInfo.generatedAt,
+    date: todayKey(),
+    driverId: currentDriverId
+  };
+  const ref = fbDb.ref('hashes/' + currentDriverId + '/' + todayKey());
+  try {
+    await ref.set(record);
+    return hashInfo;
+  } catch(e) {
+    console.warn('ハッシュ保存失敗:', e);
+    return hashInfo;
+  }
+}
+async function verifyDailyHash() {
+  if (!currentDriverId) { showAlert('ドライバーを選択してください', 'info'); return; }
+  if (!fbSyncEnabled) { showAlert('Firebase未接続', 'warn'); return; }
+  const current = await calcDailyHash();
+  if (!current) { showAlert('本日のデータなし', 'info'); return; }
+  const ref = fbDb.ref('hashes/' + currentDriverId + '/' + todayKey());
+  try {
+    const snap = await ref.once('value');
+    const saved = snap.val();
+    if (!saved) {
+      showAlert('保存されたハッシュがありません(まだ日報未出力)', 'info');
+      return;
+    }
+    const isValid = saved.hash === current.hash;
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay show';
+    overlay.style.zIndex = '300';
+    const statusIcon = isValid ? '✅' : '⚠️';
+    const statusText = isValid ? 'データは改ざんされていません' : 'データが変更されています';
+    const statusColor = isValid ? 'var(--green)' : 'var(--red)';
+    overlay.innerHTML = `<div class="modal" style="max-width:340px;text-align:center;">
+      <div style="font-size:42px;margin-bottom:8px;">${statusIcon}</div>
+      <h3 style="color:${statusColor};">${statusText}</h3>
+      <div style="font-size:11px;color:var(--text);margin:14px 0;line-height:1.8;text-align:left;">
+        <div><b>日報出力時のハッシュ:</b><br><span style="font-family:var(--mono);font-size:10px;color:var(--accent);">${saved.hash.substring(0,32)}...</span></div>
+        <div style="margin-top:8px;"><b>現在のハッシュ:</b><br><span style="font-family:var(--mono);font-size:10px;color:${isValid ? 'var(--green)' : 'var(--red)'};">${current.hash.substring(0,32)}...</span></div>
+        <div style="margin-top:8px;font-size:10px;color:var(--text-dim);"><b>記録時刻:</b> ${new Date(saved.generatedAt).toLocaleString('ja-JP')}</div>
+      </div>
+      <div class="modal-btns"><button class="modal-btn primary" onclick="this.closest('.modal-overlay').remove()">閉じる</button></div>
+    </div>`;
+    document.body.appendChild(overlay);
+  } catch(e) {
+    showAlert('検証失敗: ' + e.message, 'warn');
+  }
+}
+
 // 手動バックアップ (ボタンから呼ばれる)
 function fbBackupAllManual() {
   if (!fbSyncEnabled) { showAlert('Firebase未接続', 'warn'); return; }
@@ -3968,6 +4066,7 @@ function openSettingsModal() {
 }
 function closeSettingsModal() { document.getElementById('settingsModal').classList.remove('show'); }
 let editingLogIdx = null;
+let currentDailyHash = null;
 function openEditLog(idx) {
   editingLogIdx = idx;
   const l = logs[idx];
@@ -4356,8 +4455,15 @@ function exportLog() {
   hint.textContent = driver.email ? `メール宛先: ${driver.email}` : 'メール宛先未登録(ドライバー設定で登録可)';
   updateManualDistanceUI();
   document.getElementById('sendModal').classList.add('show');
-  // 日報出力時に自動でクラウドバックアップ
+  // 日報出力時に自動でクラウドバックアップ+ハッシュ保存
   autoBackupToCloud();
+  saveDailyHash().then(hashInfo => {
+    if (hashInfo) {
+      currentDailyHash = hashInfo;
+      const hashEl = document.getElementById('reportHash');
+      if (hashEl) hashEl.textContent = hashInfo.shortHash;
+    }
+  });
 }
 function showInspectionRequired() {
   const overlay = document.createElement('div');
@@ -4603,7 +4709,10 @@ function downloadPDF() {
     <div class="sign-box"><div class="label">運転者印</div></div>
     <div class="sign-box"><div class="label">運行管理者印</div></div>
   </div>
-  <div class="footer">デジログ 出力: ${new Date().toLocaleString('ja-JP')}</div>
+  <div class="footer">
+    デジログ 出力: ${new Date().toLocaleString('ja-JP')}
+    ${currentDailyHash ? `<br><span style="font-family:monospace;font-size:7pt;color:#888;">改ざん検知ハッシュ: ${currentDailyHash.hash.substring(0,32)}... (SHA-256)</span>` : ''}
+  </div>
   <script>setTimeout(() => window.print(), 500);<\/script>
 </body></html>`;
 
