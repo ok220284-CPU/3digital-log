@@ -1694,11 +1694,27 @@ function logEvent(label, newStatus, extra = {}) {
   updateSummaryUI();
   updateToggleUI();
   renderLogs();
+  // 読み上げ処理(シンプル化)
   if (extra.skipSpeak) {
-    // 高速料金など、独自の読み上げを使う場合
+    // 高速料金
     speak('高速道です');
   } else {
-    speak(`${label}をします`);
+    let speakText = '';
+    const b = baseAction;
+    if (b === '出庫') speakText = '出庫します';
+    else if (b === '帰庫') speakText = '帰庫します';
+    else if (b === '荷積') speakText = '荷積みです';
+    else if (b === '荷降') speakText = '荷降しです';
+    else if (b === '運転開始') speakText = '運転します';
+    else if (b === '休憩') speakText = '休憩です';
+    else if (b === '待機') speakText = '待機です';
+    else if (b === '洗車') speakText = '洗車です';
+    else if (b === '点検') speakText = '点検です';
+    else if (extra.fuelLiter) speakText = `給油 ${extra.fuelLiter}リットル`;
+    else if (label.startsWith('乗務前点呼')) speakText = '乗務前点呼完了';
+    else if (label.startsWith('乗務後点呼')) speakText = '乗務後点呼完了';
+    else speakText = label;
+    speak(speakText);
   }
   showAlert(`✓ ${label}を記録`, 'info');
   if (autoLoadChanged) {
