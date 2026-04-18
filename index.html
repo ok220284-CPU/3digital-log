@@ -519,10 +519,10 @@ body {
   <button class="action-btn" onclick="openTenkoModal()">📋 点呼</button>
   <button class="action-btn" onclick="openSiteModal('load')">📦 荷積</button>
   <button class="action-btn drive" onclick="logEvent('運転開始', 'drive')"><span class="ico">🚛</span>運転開始</button>
-  <button class="action-btn rest" onclick="logEvent('休憩', 'rest')"><span class="ico">☕</span>休憩</button>
+  <button class="action-btn" onclick="openTollModal()">🛣 高速</button>
   <button class="action-btn" onclick="openSiteModal('unload')">📥 荷降</button>
   <button class="action-btn" onclick="logEvent('待機', 'idle')">⏸ 待機</button>
-  <button class="action-btn" onclick="openTollModal()">🛣 高速</button>
+  <button class="action-btn rest" onclick="logEvent('休憩', 'rest')"><span class="ico">☕</span>休憩</button>
   <button class="action-btn" onclick="openFuelModal()">⛽ 給油</button>
   <button class="action-btn" onclick="logEvent('洗車', 'work')">💧 洗車</button>
   <button class="action-btn" onclick="logEvent('点検', 'work')">🔧 点検</button>
