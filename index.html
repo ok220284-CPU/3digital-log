@@ -1199,10 +1199,30 @@ fbAuth.signInAnonymously().then(cred => {
   fbSyncEnabled = true;
   console.log('Firebase: 匿名ログイン成功', fbUid);
   setTimeout(() => fbSyncCurrentState(), 1000);
+  // 自分のドライバーデータの承認状態を監視
+  setTimeout(watchMyApproval, 1500);
 }).catch(err => {
   console.warn('Firebase: ログイン失敗', err);
   fbSyncEnabled = false;
 });
+function watchMyApproval() {
+  if (!fbSyncEnabled || !currentDriverId) return;
+  fbDb.ref('drivers/' + currentDriverId + '/approval').on('value', snap => {
+    const approval = snap.val();
+    if (approval && approval.date === todayKey()) {
+      state.approval = approval;
+      saveState();
+      // 承認通知(初回のみ)
+      if (!sessionStorage.getItem('dt_approval_notified_' + approval.approvedAt)) {
+        sessionStorage.setItem('dt_approval_notified_' + approval.approvedAt, '1');
+        showAlert(`✓ ${approval.managerName}さんが日報を承認しました`, 'info');
+      }
+    } else {
+      state.approval = null;
+      saveState();
+    }
+  });
+}
 
 function fbSyncCurrentState() {
   if (!fbSyncEnabled || !currentDriverId) return;
@@ -1273,6 +1293,13 @@ function renderAdminPanel(allDrivers) {
   html += '<span style="font-size:12px;font-weight:700;color:var(--text);">👁 全ドライバー状況</span>';
   html += '<button onclick="fbRefreshAdmin()" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;">🔄 最新に更新</button>';
   html += '</div>';
+  // 管理者名の確認(未設定なら入力促す)
+  const managerName = localStorage.getItem('dt_manager_name') || '';
+  if (!managerName) {
+    html += '<div style="background:#FFF3E0;color:#E65100;padding:8px;border-radius:6px;margin-bottom:8px;font-size:11px;">⚠️ 運行管理者名が未設定です。<button onclick="setManagerName()" style="background:#E65100;color:#fff;border:none;border-radius:4px;padding:3px 10px;margin-left:6px;font-size:10px;cursor:pointer;">設定</button></div>';
+  } else {
+    html += `<div style="font-size:10px;color:var(--text-dim);margin-bottom:8px;">管理者: <b style="color:var(--accent);">${managerName}</b> <button onclick="setManagerName()" style="background:none;border:none;color:var(--accent);font-size:10px;cursor:pointer;padding:0 4px;">変更</button></div>`;
+  }
   Object.entries(allDrivers).sort((a,b) => (b[1].lastUpdate||0) - (a[1].lastUpdate||0)).forEach(([id, d]) => {
     const ago = d.lastUpdate ? Math.floor((Date.now() - d.lastUpdate) / 60000) : -1;
     const agoText = ago < 0 ? '' : ago < 1 ? '(たった今)' : '(' + ago + '分前)';
@@ -1283,6 +1310,8 @@ function renderAdminPanel(allDrivers) {
     let dist = '-';
     if (d.odoStart && d.odoEnd) dist = (d.odoEnd - d.odoStart) + 'km';
     else if (d.manualDistance) dist = d.manualDistance + 'km';
+    // 承認状況
+    const approval = d.approval || null;
     html += '<div style="background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
     html += '<span style="font-weight:700;font-size:14px;">' + (d.name||id) + '</span>';
@@ -1301,9 +1330,57 @@ function renderAdminPanel(allDrivers) {
       html += '<a href="https://www.google.com/maps?q=' + d.location.lat + ',' + d.location.lng + '" target="_blank" style="color:#4FC3F7;text-decoration:none;">📍 位置を確認 (' + locAgoText + ')</a>';
       html += '</div>';
     }
+    // 承認セクション
+    if (approval && approval.date === todayKey()) {
+      const approvedAt = new Date(approval.approvedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+      html += `<div style="background:var(--green);color:#000;padding:6px 8px;border-radius:4px;margin-top:6px;font-size:11px;display:flex;justify-content:space-between;align-items:center;">
+        <span>✓ 承認済み: ${approval.managerName} (${approvedAt})</span>
+        <button onclick="revokeApproval('${id}')" style="background:none;border:1px solid #000;color:#000;padding:2px 6px;border-radius:3px;font-size:9px;cursor:pointer;">取消</button>
+      </div>`;
+    } else {
+      html += `<button onclick="approveDriver('${id}','${(d.name||id).replace(/'/g,"\\\\'")}')" style="width:100%;background:#7B1FA2;color:#fff;border:none;padding:6px;border-radius:4px;margin-top:6px;font-size:11px;cursor:pointer;font-weight:700;">📋 日報を承認</button>`;
+    }
     html += '</div>';
   });
   panel.innerHTML = html;
+}
+function setManagerName() {
+  const current = localStorage.getItem('dt_manager_name') || '';
+  const name = prompt('運行管理者のお名前を入力してください', current);
+  if (name && name.trim()) {
+    localStorage.setItem('dt_manager_name', name.trim());
+    showAlert('✓ 管理者名を保存', 'info');
+    fbRefreshAdmin();
+  }
+}
+function approveDriver(driverId, driverName) {
+  const managerName = localStorage.getItem('dt_manager_name');
+  if (!managerName) {
+    showAlert('先に運行管理者名を設定してください', 'warn');
+    setManagerName();
+    return;
+  }
+  if (!confirm(`${driverName}さんの本日の日報を承認しますか？\n\n管理者: ${managerName}`)) return;
+  const approval = {
+    managerName,
+    approvedAt: new Date().toISOString(),
+    date: todayKey(),
+    approvedBy: fbUid || 'unknown'
+  };
+  // ドライバーのデータに承認情報を書き込む
+  fbDb.ref('drivers/' + driverId + '/approval').set(approval).then(() => {
+    showAlert(`✓ ${driverName}さんの日報を承認しました`, 'info');
+    fbRefreshAdmin();
+  }).catch(err => {
+    showAlert('承認失敗: ' + err.message, 'warn');
+  });
+}
+function revokeApproval(driverId) {
+  if (!confirm('承認を取り消しますか？')) return;
+  fbDb.ref('drivers/' + driverId + '/approval').remove().then(() => {
+    showAlert('✓ 承認を取り消しました', 'info');
+    fbRefreshAdmin();
+  });
 }
 function fbRefreshAdmin() {
   fbDb.ref('drivers').once('value', snap => {
@@ -1557,7 +1634,8 @@ let state = {
   odoStart: null,
   odoEnd: null,
   manualDistance: null,
-  pendingLoadChange: null
+  pendingLoadChange: null,
+  approval: null
 };
 let logs = [];
 let drivers = [];
@@ -4706,8 +4784,8 @@ function downloadPDF() {
   ${fuelRows ? `<h2>給油明細</h2><table><thead><tr><th class="time-col">時刻</th><th>給油量</th><th>金額</th></tr></thead><tbody>${fuelRows}</tbody></table>` : ''}
   ${tollRows ? `<h2>高速料金明細</h2><table><thead><tr><th class="time-col">時刻</th><th>区間</th><th>金額</th></tr></thead><tbody>${tollRows}</tbody></table>` : ''}
   <div class="sign-area">
-    <div class="sign-box"><div class="label">運転者印</div></div>
-    <div class="sign-box"><div class="label">運行管理者印</div></div>
+    <div class="sign-box"><div class="label">運転者印</div><div style="font-size:9pt;margin-top:8px;">${driver.name}</div></div>
+    <div class="sign-box"><div class="label">運行管理者印</div>${state.approval && state.approval.date === todayKey() ? `<div style="font-size:9pt;color:#2e7d32;font-weight:bold;margin-top:8px;">✓ ${state.approval.managerName}</div><div style="font-size:7pt;color:#555;">${new Date(state.approval.approvedAt).toLocaleString('ja-JP')}</div>` : ''}</div>
   </div>
   <div class="footer">
     デジログ 出力: ${new Date().toLocaleString('ja-JP')}
