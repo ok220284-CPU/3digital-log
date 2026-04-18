@@ -688,6 +688,8 @@ body {
       <button class="modal-btn primary" onclick="closeSettingsModal(); openStatsModal();">📊 週間・月間集計</button>
       <button class="modal-btn primary" onclick="closeSettingsModal(); openScoreModal();">⛽ 燃費評価</button>
       <button class="modal-btn primary" onclick="closeSettingsModal(); openPlanModal();">📋 運行予定</button>
+      <button class="modal-btn primary" onclick="closeSettingsModal(); openIncidentModal();" style="background:var(--red);color:#fff;">⚠️ 事故・ヒヤリハット記録</button>
+      <button class="modal-btn primary" onclick="closeSettingsModal(); openIncidentHistoryModal();">📋 事故・ヒヤリハット履歴</button>
       <button class="modal-btn primary" onclick="closeSettingsModal(); openDriverModal();">👤 ドライバー管理</button>
       <button class="modal-btn primary" onclick="closeSettingsModal(); openVehicleModal();">🚛 車両台帳</button>
       <button class="modal-btn primary" onclick="closeSettingsModal(); openBackupModal();">💾 バックアップ/復元</button>
@@ -989,6 +991,65 @@ body {
     <div class="modal-btns" style="margin-top:12px;">
       <button class="modal-btn" onclick="closeInspectionModal()">キャンセル</button>
       <button class="modal-btn primary" onclick="saveInspection()">記録</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- 事故・ヒヤリハットモーダル -->
+<div class="modal-overlay" id="incidentModal">
+  <div class="modal" style="max-width:95%;max-height:90vh;overflow-y:auto;">
+    <h3>⚠️ 事故・ヒヤリハット記録</h3>
+
+    <div class="chip-label">種別 <span style="color:var(--red);">*必須</span></div>
+    <div class="chip-row" id="incidentTypeChips">
+      <div class="chip" onclick="selectIncidentType('hiyari')">ヒヤリハット</div>
+      <div class="chip" onclick="selectIncidentType('minor')">軽微な事故</div>
+      <div class="chip" onclick="selectIncidentType('major')">重大な事故</div>
+      <div class="chip" onclick="selectIncidentType('property')">物損</div>
+      <div class="chip" onclick="selectIncidentType('other')">その他</div>
+    </div>
+
+    <div class="chip-label">発生場所 <button onclick="incidentGetLocation()" style="background:none;border:none;color:var(--accent);font-size:10px;cursor:pointer;padding:0 4px;">📍 GPS自動取得</button></div>
+    <input type="text" id="incidentLocation" placeholder="例: 大阪市港区 築港3丁目交差点">
+
+    <div class="chip-label">状況 <span style="color:var(--red);">*必須</span></div>
+    <textarea id="incidentDesc" placeholder="例: 右折時、横から自転車が飛び出してきた。急ブレーキで回避。" style="width:100%;min-height:70px;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:13px;resize:vertical;font-family:inherit;"></textarea>
+
+    <div class="chip-label">天候</div>
+    <div class="chip-row" id="incidentWeatherChips">
+      <div class="chip" onclick="selectIncidentWeather('晴')">☀ 晴</div>
+      <div class="chip" onclick="selectIncidentWeather('曇')">☁ 曇</div>
+      <div class="chip" onclick="selectIncidentWeather('雨')">☔ 雨</div>
+      <div class="chip" onclick="selectIncidentWeather('雪')">❄ 雪</div>
+      <div class="chip" onclick="selectIncidentWeather('霧')">🌫 霧</div>
+    </div>
+
+    <div class="chip-label">対応・処置</div>
+    <input type="text" id="incidentAction" placeholder="例: 警察通報/相手連絡先交換/会社報告">
+
+    <div class="chip-label">写真 (任意)</div>
+    <label for="incidentPhotoInput" style="display:block;background:var(--bg);border:1px dashed var(--border);padding:10px;border-radius:6px;cursor:pointer;text-align:center;font-size:11px;color:var(--text-dim);">
+      📷 写真を撮影/選択 (複数可)
+    </label>
+    <input type="file" id="incidentPhotoInput" accept="image/*" multiple style="display:none;" onchange="incidentAddPhotos(event)">
+    <div id="incidentPhotoPreview" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;"></div>
+
+    <div class="modal-btns" style="margin-top:14px;">
+      <button class="modal-btn" onclick="closeIncidentModal()">キャンセル</button>
+      <button class="modal-btn primary danger" onclick="saveIncident()" style="background:var(--red);color:#fff;">⚠️ 記録する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 事故・ヒヤリハット履歴モーダル -->
+<div class="modal-overlay" id="incidentHistoryModal">
+  <div class="modal" style="max-width:95%;max-height:90vh;overflow-y:auto;">
+    <h3>📋 事故・ヒヤリハット履歴</h3>
+    <div id="incidentHistoryList" style="max-height:60vh;overflow-y:auto;"></div>
+    <div class="modal-btns" style="margin-top:12px;">
+      <button class="modal-btn" onclick="closeIncidentHistoryModal()">閉じる</button>
     </div>
   </div>
 </div>
@@ -2976,6 +3037,187 @@ function saveInspection() {
     : `日常点検 (異常なし ${okCount}項目)`;
   logEvent(label, 'work', { inspectionData, baseAction: '点検' });
 }
+
+// ===== 事故・ヒヤリハット =====
+let incidentState = {
+  type: null,
+  weather: null,
+  photos: []
+};
+function openIncidentModal() {
+  if (!currentDriverId) { showAlert('ドライバーを選択してください', 'info'); return; }
+  incidentState = { type: null, weather: null, photos: [] };
+  document.getElementById('incidentLocation').value = '';
+  document.getElementById('incidentDesc').value = '';
+  document.getElementById('incidentAction').value = '';
+  document.getElementById('incidentPhotoPreview').innerHTML = '';
+  updateIncidentChips();
+  // GPS自動取得
+  fetchGeoLocation(loc => {
+    if (loc) document.getElementById('incidentLocation').value = loc;
+  });
+  document.getElementById('incidentModal').classList.add('show');
+}
+function closeIncidentModal() {
+  document.getElementById('incidentModal').classList.remove('show');
+}
+function selectIncidentType(type) {
+  incidentState.type = type;
+  updateIncidentChips();
+}
+function selectIncidentWeather(weather) {
+  incidentState.weather = weather;
+  updateIncidentChips();
+}
+function updateIncidentChips() {
+  const typeMap = {'hiyari':'ヒヤリハット','minor':'軽微な事故','major':'重大な事故','property':'物損','other':'その他'};
+  document.querySelectorAll('#incidentTypeChips .chip').forEach(c => {
+    c.classList.toggle('selected', c.textContent.trim() === typeMap[incidentState.type]);
+  });
+  document.querySelectorAll('#incidentWeatherChips .chip').forEach(c => {
+    c.classList.toggle('selected', c.textContent.includes(incidentState.weather || '_____'));
+  });
+}
+function incidentGetLocation() {
+  const input = document.getElementById('incidentLocation');
+  input.placeholder = '📍 取得中...';
+  fetchGeoLocation(loc => {
+    if (loc) {
+      input.value = loc;
+      showAlert('📍 ' + loc, 'info');
+    } else {
+      showAlert('位置取得失敗', 'warn');
+    }
+    input.placeholder = '例: 大阪市港区 築港3丁目交差点';
+  });
+}
+function incidentAddPhotos(event) {
+  const files = Array.from(event.target.files);
+  event.target.value = '';
+  files.forEach(file => {
+    // 画像を圧縮してbase64化
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        // 最大幅800pxに縮小
+        const maxW = 800;
+        const scale = Math.min(1, maxW / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const base64 = canvas.toDataURL('image/jpeg', 0.7);
+        incidentState.photos.push(base64);
+        renderIncidentPhotos();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function renderIncidentPhotos() {
+  const el = document.getElementById('incidentPhotoPreview');
+  el.innerHTML = incidentState.photos.map((p, i) => `
+    <div style="position:relative;">
+      <img src="${p}" style="width:60px;height:60px;object-fit:cover;border-radius:4px;border:1px solid var(--border);">
+      <button onclick="incidentRemovePhoto(${i})" style="position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border:none;width:20px;height:20px;border-radius:50%;font-size:10px;cursor:pointer;padding:0;">×</button>
+    </div>
+  `).join('');
+}
+function incidentRemovePhoto(idx) {
+  incidentState.photos.splice(idx, 1);
+  renderIncidentPhotos();
+}
+function saveIncident() {
+  if (!incidentState.type) {
+    showAlert('種別を選択してください', 'warn');
+    return;
+  }
+  const desc = document.getElementById('incidentDesc').value.trim();
+  if (!desc) {
+    showAlert('状況を入力してください', 'warn');
+    return;
+  }
+  const typeMap = {'hiyari':'ヒヤリハット','minor':'軽微な事故','major':'重大な事故','property':'物損','other':'その他'};
+  const incidentData = {
+    id: 'inc' + Date.now(),
+    type: incidentState.type,
+    typeName: typeMap[incidentState.type],
+    location: document.getElementById('incidentLocation').value.trim(),
+    description: desc,
+    weather: incidentState.weather,
+    action: document.getElementById('incidentAction').value.trim(),
+    photos: incidentState.photos,
+    driverId: currentDriverId,
+    driverName: (drivers.find(d => d.id === currentDriverId)||{}).name || '',
+    vehicle: (getActiveVehicle()||{}).vehicle ? getActiveVehicle().vehicle.number : '',
+    time: Date.now(),
+    date: todayKey()
+  };
+  // localStorageに保存
+  const raw = localStorage.getItem('dt_incidents');
+  const incidents = raw ? JSON.parse(raw) : [];
+  incidents.push(incidentData);
+  localStorage.setItem('dt_incidents', JSON.stringify(incidents));
+  // Firebaseにも保存
+  if (fbSyncEnabled) {
+    fbDb.ref('incidents/' + currentDriverId + '/' + incidentData.id).set(incidentData).catch(err => console.warn(err));
+  }
+  // ログにも記録
+  const label = `${incidentData.typeName}${incidentData.location ? ' (' + incidentData.location + ')' : ''}`;
+  logEvent(label, state.status, { incidentData, baseAction: '事故等' });
+  closeIncidentModal();
+  showAlert(`⚠️ ${incidentData.typeName}を記録しました`, 'warn');
+}
+function openIncidentHistoryModal() {
+  const raw = localStorage.getItem('dt_incidents');
+  const incidents = raw ? JSON.parse(raw) : [];
+  const myIncidents = incidents.filter(i => i.driverId === currentDriverId);
+  const list = document.getElementById('incidentHistoryList');
+  if (myIncidents.length === 0) {
+    list.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:20px;">記録なし</div>';
+  } else {
+    const sorted = myIncidents.slice().sort((a,b) => b.time - a.time);
+    list.innerHTML = sorted.map(i => {
+      const t = new Date(i.time);
+      const typeColor = i.type === 'hiyari' ? '#FFA726' : i.type === 'minor' ? '#FF7043' : i.type === 'major' ? '#C62828' : '#9E9E9E';
+      const photoHtml = i.photos && i.photos.length > 0
+        ? '<div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;">' + i.photos.map(p => `<img src="${p}" style="width:50px;height:50px;object-fit:cover;border-radius:3px;border:1px solid var(--border);cursor:pointer;" onclick="window.open('${p}','_blank')">`).join('') + '</div>'
+        : '';
+      return `<div style="background:var(--panel-2);border:1px solid var(--border);border-left:4px solid ${typeColor};border-radius:6px;padding:10px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <span style="background:${typeColor};color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">${i.typeName}</span>
+          <span style="font-size:10px;color:var(--text-dim);">${i.date} ${t.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}</span>
+        </div>
+        ${i.location ? `<div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">📍 ${i.location}</div>` : ''}
+        <div style="font-size:12px;color:var(--text);line-height:1.5;">${i.description.replace(/\n/g,'<br>')}</div>
+        ${i.action ? `<div style="font-size:11px;color:var(--text-dim);margin-top:4px;">対応: ${i.action}</div>` : ''}
+        ${i.weather ? `<div style="font-size:10px;color:var(--text-dim);margin-top:2px;">天候: ${i.weather}</div>` : ''}
+        ${photoHtml}
+        <button onclick="deleteIncident('${i.id}')" style="background:none;border:1px solid var(--red);color:var(--red);padding:3px 8px;border-radius:4px;font-size:10px;cursor:pointer;margin-top:6px;">削除</button>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('incidentHistoryModal').classList.add('show');
+}
+function closeIncidentHistoryModal() {
+  document.getElementById('incidentHistoryModal').classList.remove('show');
+}
+function deleteIncident(id) {
+  if (!confirm('この記録を削除しますか？')) return;
+  const raw = localStorage.getItem('dt_incidents');
+  let incidents = raw ? JSON.parse(raw) : [];
+  incidents = incidents.filter(i => i.id !== id);
+  localStorage.setItem('dt_incidents', JSON.stringify(incidents));
+  if (fbSyncEnabled && currentDriverId) {
+    fbDb.ref('incidents/' + currentDriverId + '/' + id).remove().catch(err => console.warn(err));
+  }
+  openIncidentHistoryModal();
+  showAlert('✓ 削除', 'info');
+}
+
 let currentStatsPeriod = 'week';
 function openStatsModal() {
   if (!currentDriverId) { showAlert('ドライバーを選択してください', 'info'); return; }
