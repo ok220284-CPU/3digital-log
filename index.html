@@ -937,8 +937,19 @@ body {
 <div class="modal-overlay" id="loadSiteModal">
   <div class="modal">
     <h3>▼ 荷積地を選択</h3>
-    <div class="chip-label">タップで選択 / 長押しで削除</div>
-    <div class="chip-row" id="loadSitePresets"></div>
+    <div id="loadSiteAreaView">
+      <div class="chip-label">エリアを選択</div>
+      <div class="chip-row" id="loadSiteAreas"></div>
+      <div class="chip-label" style="margin-top:6px;">よく使う (タップ)</div>
+      <div class="chip-row" id="loadSitePresets"></div>
+    </div>
+    <div id="loadSiteDetailView" style="display:none;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+        <button class="modal-btn" onclick="backSiteArea('load')" style="padding:4px 10px;font-size:11px;">← 戻る</button>
+        <span id="loadSiteAreaName" style="font-size:12px;color:var(--text);font-weight:700;"></span>
+      </div>
+      <div class="chip-row" id="loadSiteDetails"></div>
+    </div>
     <input type="text" id="loadSiteCustom" placeholder="その他の地名を入力（任意）">
     <div id="loadGpsQuickBtn" style="display:none;margin:8px 0;">
       <button class="modal-btn primary" onclick="saveCustomSite('load')" style="width:100%;padding:12px;font-size:14px;">📍 この場所で記録</button>
@@ -960,8 +971,19 @@ body {
 <div class="modal-overlay" id="unloadSiteModal">
   <div class="modal">
     <h3>▼ 荷降地を選択</h3>
-    <div class="chip-label">タップで選択 / 長押しで削除</div>
-    <div class="chip-row" id="unloadSitePresets"></div>
+    <div id="unloadSiteAreaView">
+      <div class="chip-label">エリアを選択</div>
+      <div class="chip-row" id="unloadSiteAreas"></div>
+      <div class="chip-label" style="margin-top:6px;">よく使う (タップ)</div>
+      <div class="chip-row" id="unloadSitePresets"></div>
+    </div>
+    <div id="unloadSiteDetailView" style="display:none;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+        <button class="modal-btn" onclick="backSiteArea('unload')" style="padding:4px 10px;font-size:11px;">← 戻る</button>
+        <span id="unloadSiteAreaName" style="font-size:12px;color:var(--text);font-weight:700;"></span>
+      </div>
+      <div class="chip-row" id="unloadSiteDetails"></div>
+    </div>
     <input type="text" id="unloadSiteCustom" placeholder="その他の地名を入力（任意）">
     <div id="unloadGpsQuickBtn" style="display:none;margin:8px 0;">
       <button class="modal-btn primary" onclick="saveCustomSite('unload')" style="width:100%;padding:12px;font-size:14px;">📍 この場所で記録</button>
@@ -1733,6 +1755,17 @@ function renderLogs() {
 let loadSites = [];
 let unloadSites = [];
 const DEFAULT_LOAD_SITES = ['住之江','堺','松原','枚方','西宮','港区','福島区','摂津','茨木','東住吉','美原','門真','八尾'];
+
+// 地域階層データ (エリア → 詳細地名)
+const SITE_AREAS = {
+  '🏙 大阪市': ['北区','都島区','福島区','此花区','中央区','西区','港区','大正区','天王寺区','浪速区','西淀川区','淀川区','東淀川区','東成区','生野区','旭区','城東区','鶴見区','住之江区','住吉区','東住吉区','平野区','西成区','阿倍野区','住吉','梅田','難波'],
+  '🌆 堺・南河内': ['堺市','堺区','中区','東区','西区(堺)','南区(堺)','北区(堺)','美原区','松原市','羽曳野市','藤井寺市','大阪狭山市','富田林市','河内長野市','太子町','河南町','千早赤阪村'],
+  '🏢 東部(河内)': ['東大阪市','八尾市','柏原市','門真市','守口市','大東市','四條畷市','寝屋川市','枚方市','交野市'],
+  '🌳 北摂': ['豊中市','池田市','箕面市','吹田市','茨木市','高槻市','摂津市','島本町','能勢町','豊能町'],
+  '🌊 泉州': ['岸和田市','泉大津市','和泉市','高石市','貝塚市','泉佐野市','泉南市','阪南市','熊取町','田尻町','岬町','忠岡町'],
+  '⛩ 神戸・阪神': ['神戸市','中央区(神戸)','灘区','東灘区','兵庫区','長田区','須磨区','垂水区','西区(神戸)','北区(神戸)','芦屋市','西宮市','尼崎市','伊丹市','宝塚市','川西市','三田市'],
+  '🗾 その他': ['京都市','京都府','奈良市','奈良県','和歌山市','和歌山県','姫路市','明石市','加古川市','滋賀','三重']
+};
 const DEFAULT_UNLOAD_SITES = [
   '神戸市内',
   '大阪市内',
@@ -1810,11 +1843,13 @@ function renderSitePresets(type) {
   const elId = type === 'load' ? 'loadSitePresets' : 'unloadSitePresets';
   const el = document.getElementById(elId);
   if (arr.length === 0) {
-    el.innerHTML = '<div class="chip-empty">プリセットなし</div>';
+    el.innerHTML = '<div class="chip-empty">よく使う地名はまだありません</div>';
     return;
   }
+  // count順ソート + 上位8件のみ表示(スクロール削減)
+  const top = arr.slice().sort((a,b) => (b.count||0) - (a.count||0)).slice(0, 8);
   const extraClass = type === 'unload' ? ' chip-site' : '';
-  el.innerHTML = arr.map(s => `
+  el.innerHTML = top.map(s => `
     <div class="chip${extraClass}"
       onpointerdown="startPress(() => { if(confirm('${s.name.replace(/'/g, '\\\'')} を削除しますか？')) { removeSitePreset('${type}','${s.name.replace(/'/g, '\\\'')}'); renderSitePresets('${type}'); } })"
       onpointerup="if(!cancelPress()) { saveSiteEvent('${type}','${s.name.replace(/'/g, '\\\'')}'); }"
@@ -1873,8 +1908,40 @@ function fetchGeoLocation(callback) {
   }, () => callback(null), { timeout: 8000, maximumAge: 60000 });
 }
 
+function renderSiteAreas(type) {
+  const elId = type === 'load' ? 'loadSiteAreas' : 'unloadSiteAreas';
+  const el = document.getElementById(elId);
+  el.innerHTML = Object.keys(SITE_AREAS).map(area => `
+    <div class="chip" onclick="showSiteArea('${type}', '${area}')">${area}</div>
+  `).join('');
+}
+function showSiteArea(type, areaName) {
+  const areaView = document.getElementById(type === 'load' ? 'loadSiteAreaView' : 'unloadSiteAreaView');
+  const detailView = document.getElementById(type === 'load' ? 'loadSiteDetailView' : 'unloadSiteDetailView');
+  const nameEl = document.getElementById(type === 'load' ? 'loadSiteAreaName' : 'unloadSiteAreaName');
+  const detailsEl = document.getElementById(type === 'load' ? 'loadSiteDetails' : 'unloadSiteDetails');
+  areaView.style.display = 'none';
+  detailView.style.display = 'block';
+  nameEl.textContent = areaName;
+  const sites = SITE_AREAS[areaName] || [];
+  detailsEl.innerHTML = sites.map(s => `
+    <div class="chip" onclick="saveSiteEvent('${type}', '${s.replace(/'/g, "\\'")}')">${s}</div>
+  `).join('');
+}
+function backSiteArea(type) {
+  const areaView = document.getElementById(type === 'load' ? 'loadSiteAreaView' : 'unloadSiteAreaView');
+  const detailView = document.getElementById(type === 'load' ? 'loadSiteDetailView' : 'unloadSiteDetailView');
+  areaView.style.display = 'block';
+  detailView.style.display = 'none';
+}
 function openSiteModal(type) {
   if (!currentDriverId) { showAlert('ドライバーを選択してください', 'info'); return; }
+  // エリアビューを初期化
+  const areaView = document.getElementById(type === 'load' ? 'loadSiteAreaView' : 'unloadSiteAreaView');
+  const detailView = document.getElementById(type === 'load' ? 'loadSiteDetailView' : 'unloadSiteDetailView');
+  if (areaView) areaView.style.display = 'block';
+  if (detailView) detailView.style.display = 'none';
+  renderSiteAreas(type);
   renderSitePresets(type);
   const customId = type === 'load' ? 'loadSiteCustom' : 'unloadSiteCustom';
   document.getElementById(customId).value = '';
