@@ -2189,16 +2189,21 @@ function renderTollPresets() {
     el.innerHTML = '<div class="chip-empty">履歴なし（記録すると次回から選べます）</div>';
     return;
   }
-  el.innerHTML = tollPresets.map((p, idx) => `
-    <div class="chip chip-toll"
-      onpointerdown="startPress(() => { if(confirm('この区間を削除しますか？')) { removeTollPreset(${idx}); renderTollPresets(); } })"
-      onpointerup="if(!cancelPress()) { applyTollPreset(${idx}); }"
-      onpointerleave="cancelPress()"
-    >
-      <div class="route">${p.from || '?'} → ${p.to || '?'}</div>
-      <div class="yen">¥${p.yen.toLocaleString()}</div>
+  // 使用頻度順でソート済みの配列から上位5件のみ
+  const top = tollPresets.slice(0, 5);
+  el.innerHTML = top.map((p, idx) => `
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+      <div onclick="applyTollPreset(${idx})" style="flex:1;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:6px 8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:11px;color:var(--text);">${p.from || '?'} → ${p.to || '?'}</span>
+        <span style="font-size:11px;color:var(--accent);font-weight:700;">¥${p.yen.toLocaleString()}</span>
+      </div>
+      <button onclick="removeTollPresetDirect(${idx})" style="background:none;border:1px solid var(--red);color:var(--red);width:28px;height:28px;border-radius:4px;font-size:14px;cursor:pointer;flex-shrink:0;padding:0;">×</button>
     </div>
   `).join('');
+}
+function removeTollPresetDirect(idx) {
+  removeTollPreset(idx);
+  renderTollPresets();
 }
 function applyTollPreset(idx) {
   const p = tollPresets[idx];
