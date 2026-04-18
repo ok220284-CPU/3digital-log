@@ -785,8 +785,10 @@ body {
 <div class="modal-overlay" id="tollModal">
   <div class="modal">
     <h3>▼ 高速料金</h3>
-    <div class="chip-label">過去の区間 (タップで入力/長押しで削除)</div>
-    <div id="tollPresets" style="max-height:160px;overflow-y:auto;margin-bottom:10px;"></div>
+    <details style="margin-bottom:10px;">
+      <summary style="font-size:11px;color:var(--text-dim);cursor:pointer;padding:6px;background:var(--bg);border:1px solid var(--border);border-radius:4px;">📋 過去の区間から選択 (タップで展開)</summary>
+      <div id="tollPresets" style="max-height:140px;overflow-y:auto;margin-top:6px;padding:4px;"></div>
+    </details>
     <input type="text" id="tollFrom" placeholder="入口 (例: 堺IC)">
     <input type="text" id="tollTo" placeholder="出口 (例: 吹田IC)">
     <input type="number" id="tollYen" placeholder="金額 (円)" inputmode="numeric">
@@ -1025,14 +1027,11 @@ body {
     <h3>▼ 積載確認</h3>
     <div style="font-size:14px;color:var(--white);margin-bottom:16px;line-height:1.6;">
       荷降を記録しました。<br>
-      まだ荷物は残っていますか？
-    </div>
-    <div style="font-size:11px;color:var(--text-dim);margin-bottom:14px;">
-      「いいえ」を選ぶと積載を「空車」に切り替えます
+      現在の積載は？
     </div>
     <div class="modal-btns">
-      <button class="modal-btn" onclick="confirmUnload(true)">はい（実車のまま）</button>
-      <button class="modal-btn primary" onclick="confirmUnload(false)">いいえ（空車へ）</button>
+      <button class="modal-btn" onclick="confirmUnloadSpeak(true)">実車</button>
+      <button class="modal-btn primary" onclick="confirmUnloadSpeak(false)">空車</button>
     </div>
   </div>
 </div>
@@ -1695,7 +1694,12 @@ function logEvent(label, newStatus, extra = {}) {
   updateSummaryUI();
   updateToggleUI();
   renderLogs();
-  speak(`${label}をします`);
+  if (extra.skipSpeak) {
+    // 高速料金など、独自の読み上げを使う場合
+    speak('高速道です');
+  } else {
+    speak(`${label}をします`);
+  }
   showAlert(`✓ ${label}を記録`, 'info');
   if (autoLoadChanged) {
     setTimeout(() => {
@@ -1718,6 +1722,24 @@ function confirmUnload(stillLoaded) {
     saveState();
     speak('空車です');
     showAlert('自動: 次のイベントから空車', 'info');
+  }
+}
+function confirmUnloadSpeak(stillLoaded) {
+  document.getElementById('unloadConfirmModal').classList.remove('show');
+  if (stillLoaded) {
+    // 実車ボタン: 実車のまま維持して読み上げ
+    state.load = '実車';
+    updateToggleUI();
+    saveState();
+    speak('実車です');
+    showAlert('実車のまま継続', 'info');
+  } else {
+    // 空車ボタン: 空車に切替
+    state.load = '空車';
+    updateToggleUI();
+    saveState();
+    speak('空車です');
+    showAlert('空車に切替', 'info');
   }
 }
 function updateStatusUI() {
@@ -2227,7 +2249,7 @@ function saveToll() {
   saveState();
   closeTollModal();
   const label = `高速 ${from||'?'}→${to||'?'} ¥${yen.toLocaleString()}`;
-  logEvent(label, 'work', { tollFrom: from, tollTo: to, tollYen: yen });
+  logEvent(label, 'work', { tollFrom: from, tollTo: to, tollYen: yen, skipSpeak: true });
 }
 let pendingOdoType = null;
 function getLastOdometer(driverId) {
@@ -2382,11 +2404,48 @@ function openTenkoModal() {
   const type = state.dutyStart ? '乗務後点呼' : '乗務前点呼';
   document.getElementById('tenkoTitle').textContent = `▼ ${type}`;
   document.getElementById('tenkoAlcohol').value = '0.00';
-  document.getElementById('tenkoSleep').value = '';
-  document.getElementById('tenkoNote').value = '';
-  tenkoSelection = { health: '良好', check: '異常なし' };
+  document.getElementById('tenkoAlcohol').style.display = 'none';
+  // 前回の睡眠時間をデフォルトに設定
+  const lastSleep = getLastTenkoSleep(currentDriverId);
+  const sleepInput = document.getElementById('tenkoSleep');
+  const lastSleepEl = document.getElementById('tenkoLastSleep');
+  if (lastSleep) {
+    sleepInput.value = lastSleep;
+    if (lastSleepEl) lastSleepEl.textContent = lastSleep + 'h';
+    tenkoSelection = { health: '良好', check: '異常なし', alcohol: '0.00', sleep: String(lastSleep) };
+  } else {
+    sleepInput.value = '';
+    if (lastSleepEl) lastSleepEl.textContent = '-';
+    tenkoSelection = { health: '良好', check: '異常なし', alcohol: '0.00' };
+  }
+  sleepInput.style.display = 'none';
   updateTenkoChips();
   document.getElementById('tenkoModal').classList.add('show');
+}
+function getLastTenkoSleep(driverId) {
+  const raw = localStorage.getItem('dt_last_sleep_' + driverId);
+  return raw ? parseFloat(raw) : null;
+}
+function saveLastTenkoSleep(driverId, sleep) {
+  localStorage.setItem('dt_last_sleep_' + driverId, String(sleep));
+}
+function selectTenkoAlcohol(val) {
+  const input = document.getElementById('tenkoAlcohol');
+  if (val === 'custom') {
+    input.style.display = 'block';
+    input.focus();
+    tenkoSelection.alcohol = 'custom';
+  } else {
+    input.value = val;
+    input.style.display = 'none';
+    tenkoSelection.alcohol = val;
+  }
+  updateTenkoChips();
+}
+function selectTenkoSleep(val) {
+  document.getElementById('tenkoSleep').value = val;
+  tenkoSelection.sleep = val;
+  updateTenkoChips();
 }
 function closeTenkoModal() { document.getElementById('tenkoModal').classList.remove('show'); }
 function selectTenko(key, val) {
@@ -2421,6 +2480,8 @@ function saveTenko() {
     alcohol, health: tenkoSelection.health, check: tenkoSelection.check,
     sleep, note, type
   };
+  // 睡眠時間を保存(次回デフォルト用) - 乗務前/後問わず
+  if (sleep) saveLastTenkoSleep(currentDriverId, sleep);
   closeTenkoModal();
   if (alcohol >= 0.15) {
     showAlert('⚠️ アルコール検知値が基準値(0.15)以上です！運転できません', 'warn');
