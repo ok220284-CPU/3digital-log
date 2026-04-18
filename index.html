@@ -895,7 +895,13 @@ body {
   <div class="modal">
     <h3 id="tenkoTitle">▼ 点呼記録</h3>
     <div class="chip-label">アルコール検知値 (mg/L)</div>
-    <input type="number" id="tenkoAlcohol" placeholder="例: 0.00" step="0.01" inputmode="decimal" value="0.00">
+    <div class="chip-row" id="tenkoAlcoholChips">
+      <div class="chip" onclick="selectTenkoAlcohol('0.00')">0.00</div>
+      <div class="chip" onclick="selectTenkoAlcohol('0.01')">0.01</div>
+      <div class="chip" onclick="selectTenkoAlcohol('0.02')">0.02</div>
+      <div class="chip" onclick="selectTenkoAlcohol('custom')">手動</div>
+    </div>
+    <input type="number" id="tenkoAlcohol" placeholder="例: 0.00" step="0.01" inputmode="decimal" value="0.00" style="display:none;">
     <div class="chip-label">健康状態</div>
     <div class="chip-row">
       <div class="chip" onclick="selectTenko('health','良好')">良好</div>
@@ -907,10 +913,19 @@ body {
       <div class="chip" onclick="selectTenko('check','異常なし')">異常なし</div>
       <div class="chip" onclick="selectTenko('check','要確認')">要確認</div>
     </div>
-    <div class="chip-label">睡眠時間 (帰庫後の点呼では省略可)</div>
-    <input type="number" id="tenkoSleep" placeholder="例: 7" step="0.5" inputmode="decimal">
-    <div class="chip-label">備考</div>
-    <input type="text" id="tenkoNote" placeholder="任意">
+    <div class="chip-label">睡眠時間 (前回: <span id="tenkoLastSleep">-</span>)</div>
+    <div class="chip-row" id="tenkoSleepChips">
+      <div class="chip" onclick="selectTenkoSleep('3')">3</div>
+      <div class="chip" onclick="selectTenkoSleep('4')">4</div>
+      <div class="chip" onclick="selectTenkoSleep('5')">5</div>
+      <div class="chip" onclick="selectTenkoSleep('6')">6</div>
+      <div class="chip" onclick="selectTenkoSleep('7')">7</div>
+      <div class="chip" onclick="selectTenkoSleep('8')">8</div>
+      <div class="chip" onclick="selectTenkoSleep('9')">9</div>
+      <div class="chip" onclick="selectTenkoSleep('10')">10</div>
+    </div>
+    <input type="number" id="tenkoSleep" placeholder="例: 7" step="0.5" inputmode="decimal" style="display:none;">
+    <input type="hidden" id="tenkoNote" value="">
     <div class="modal-btns">
       <button class="modal-btn" onclick="closeTenkoModal()">キャンセル</button>
       <button class="modal-btn primary" onclick="saveTenko()">記録</button>
